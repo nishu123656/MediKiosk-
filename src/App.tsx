@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UserRole, ScreenType, DEMO_ROLES } from "./types";
-import UniversalNavBar from "./components/UniversalNavBar";
+import RoleSidebar from "./components/RoleSidebar";
+import RolePlaceholders from "./components/RolePlaceholders";
 import Register from "./Register";
-import Login from "./Login";
 import Consent from "./Consent";
 import CheckIn from "./CheckIn";
 import ClinicalIntake from "./ClinicalIntake";
@@ -26,6 +26,20 @@ import LabDashboard from "./LabDashboard";
 import HospitalDashboard from "./HospitalDashboard";
 import DoctorProfile from "./DoctorProfile";
 import AppointmentBooking from "./AppointmentBooking";
+import PharmacyRegistration from "./PharmacyRegistration";
+import LabRegistration from "./LabRegistration";
+
+// Authentication & Role-Based Access Control
+import { AuthProvider, useAuth, AuthUser } from "./context/AuthContext";
+import AccountTypeSelect from "./auth/AccountTypeSelect";
+import PatientLogin from "./auth/PatientLogin";
+import DoctorLogin from "./auth/DoctorLogin";
+import HospitalLogin from "./auth/HospitalLogin";
+import PharmacyLogin from "./auth/PharmacyLogin";
+import LabLogin from "./auth/LabLogin";
+import AdminLogin from "./auth/AdminLogin";
+import AccessRestricted from "./components/AccessRestricted";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // ─── Icons (inline SVG, Lucide-style) ───────────────────────────────────────
 const Icon = ({ d, size = 18, stroke = "currentColor", fill = "none" }: { d: string; size?: number; stroke?: string; fill?: string }) => (
@@ -190,7 +204,21 @@ function Sidebar({ active, setActive, onLogout }: { active: string; setActive: (
 }
 
 // ─── Top Header ───────────────────────────────────────────────────────────────
-function Header({ onRegister, onDoctorView, onHospitalReg, onHospitalVerify, onDoctorReg, onDoctorApproval, onAdmin, onPharmacyDash, onLabDash, onHospitalDash, onDoctorProfile, onApptBooking }: { onRegister: () => void; onDoctorView?: () => void; onHospitalReg?: () => void; onHospitalVerify?: () => void; onDoctorReg?: () => void; onDoctorApproval?: () => void; onAdmin?: () => void; onPharmacyDash?: () => void; onLabDash?: () => void; onHospitalDash?: () => void; onDoctorProfile?: () => void; onApptBooking?: () => void }) {
+function Header({
+  onRegister,
+  onApptBooking,
+  onLogout,
+  currentUser,
+}: {
+  onRegister: () => void;
+  onApptBooking?: () => void;
+  onLogout?: () => void;
+  currentUser?: AuthUser | null;
+}) {
+  const displayName = currentUser?.name || "Rahul Sharma";
+  const avatarInit = currentUser?.avatarText || displayName.charAt(0) || "P";
+  const isAbhaVerified = currentUser?.abhaId || currentUser?.verified;
+
   return (
     <header style={{ height: 60, background: "#fff", borderBottom: "1px solid #e8ecf0", display: "flex", alignItems: "center", padding: "0 28px", gap: 16, flexShrink: 0, position: "sticky", top: 0, zIndex: 10 }}>
       {/* Breadcrumb */}
@@ -231,95 +259,6 @@ function Header({ onRegister, onDoctorView, onHospitalReg, onHospitalVerify, onD
           Book Appointment
         </button>
       )}
-      {/* Doctor profile */}
-      {onDoctorProfile && (
-        <button
-          onClick={onDoctorProfile}
-          style={{ padding: "7px 14px", background: "#f0fdf9", color: "#0d7a6e", border: "1px solid #b2e8e0", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
-        >
-          Doctor Profile
-        </button>
-      )}
-      {/* Hospital dashboard */}
-      {onHospitalDash && (
-        <button
-          onClick={onHospitalDash}
-          style={{ padding: "7px 14px", background: "#f0fdf9", color: "#0d7a6e", border: "1px solid #b2e8e0", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
-        >
-          Hospital
-        </button>
-      )}
-      {/* Lab dashboard */}
-      {onLabDash && (
-        <button
-          onClick={onLabDash}
-          style={{ padding: "7px 14px", background: "#f0fdf9", color: "#0d7a6e", border: "1px solid #b2e8e0", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
-        >
-          Lab Dashboard
-        </button>
-      )}
-      {/* Pharmacy dashboard */}
-      {onPharmacyDash && (
-        <button
-          onClick={onPharmacyDash}
-          style={{ padding: "7px 14px", background: "#f0fdf9", color: "#0d7a6e", border: "1px solid #b2e8e0", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
-        >
-          Pharmacy
-        </button>
-      )}
-      {/* Admin dashboard */}
-      {onAdmin && (
-        <button
-          onClick={onAdmin}
-          style={{ padding: "7px 14px", background: "#0f1f3d", color: "#fff", border: "none", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
-        >
-          Admin Console
-        </button>
-      )}
-      {/* Doctor approval */}
-      {onDoctorApproval && (
-        <button
-          onClick={onDoctorApproval}
-          style={{ padding: "7px 14px", background: "#f0fdf9", color: "#0d7a6e", border: "1px solid #b2e8e0", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
-        >
-          Doctor Approvals
-        </button>
-      )}
-      {/* Doctor registration */}
-      {onDoctorReg && (
-        <button
-          onClick={onDoctorReg}
-          style={{ padding: "7px 14px", background: "#f0fdf9", color: "#0d7a6e", border: "1px solid #b2e8e0", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
-        >
-          Register Doctor
-        </button>
-      )}
-      {/* Hospital verify */}
-      {onHospitalVerify && (
-        <button
-          onClick={onHospitalVerify}
-          style={{ padding: "7px 14px", background: "#f0fdf9", color: "#0d7a6e", border: "1px solid #b2e8e0", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
-        >
-          Verify Hospitals
-        </button>
-      )}
-      {/* Doctor view */}
-      {onHospitalReg && (
-        <button
-          onClick={onHospitalReg}
-          style={{ padding: "7px 14px", background: "#f0fdf9", color: "#0d7a6e", border: "1px solid #b2e8e0", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
-        >
-          Register Hospital
-        </button>
-      )}
-      {onDoctorView && (
-        <button
-          onClick={onDoctorView}
-          style={{ padding: "7px 14px", background: "#0f1f3d", color: "#fff", border: "none", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
-        >
-          Doctor View
-        </button>
-      )}
 
       {/* Bell */}
       <div style={{ position: "relative", cursor: "pointer" }}>
@@ -331,16 +270,38 @@ function Header({ onRegister, onDoctorView, onHospitalReg, onHospitalVerify, onD
       <div style={{ width: 1, height: 28, background: "#e8ecf0" }} />
 
       {/* Profile */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer" }}>
-        <div style={{ width: 34, height: 34, borderRadius: "50%", background: "#0d7a6e", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: "#fff" }}>R</div>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{ width: 34, height: 34, borderRadius: "50%", background: "#0d7a6e", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: "#fff" }}>{avatarInit}</div>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "#0f1f3d" }}>Rahul Sharma</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: "#0f1f3d" }}>{displayName}</div>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#16a34a" }} />
-            <span style={{ fontSize: 10, color: "#16a34a", fontWeight: 600 }}>ABHA Verified</span>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: isAbhaVerified ? "#16a34a" : "#94a3b8" }} />
+            <span style={{ fontSize: 10, color: isAbhaVerified ? "#16a34a" : "#64748b", fontWeight: 600 }}>{isAbhaVerified ? "ABHA Verified" : "Patient"}</span>
           </div>
         </div>
-        <Icon d={icons.chevronDown} size={14} stroke="#94a3b8" />
+        {onLogout && (
+          <button
+            onClick={onLogout}
+            title="Sign Out"
+            style={{
+              marginLeft: 8,
+              padding: "5px 9px",
+              background: "#fff1f2",
+              border: "1px solid #fecdd3",
+              borderRadius: 6,
+              color: "#e11d48",
+              fontSize: 11,
+              fontWeight: 600,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            <Icon d={icons.logout} size={13} stroke="#e11d48" />
+            Logout
+          </button>
+        )}
       </div>
     </header>
   );
@@ -524,43 +485,313 @@ function RxRow({ name, dosage, doctor, date }: { name: string; dosage: string; d
   );
 }
 
-// ─── Main Dashboard ───────────────────────────────────────────────────────────
-export default function App() {
-  const [active, setActive] = useState("dashboard");
-  const [role, setRole] = useState<UserRole>("patient");
-  const [screen, setScreen] = useState<ScreenType>("login");
+// ─── Main Dashboard & Application Container ──────────────────────────────────
+function MediKioskApp() {
+  const { currentUser, userRole, isAuthenticated, login, logout, canAccessScreen } = useAuth();
+  const [activeAuthRole, setActiveAuthRole] = useState<UserRole | null>(null);
+  const [authFlow, setAuthFlow] = useState<"login" | "register" | null>("login");
+  const [screen, setScreen] = useState<ScreenType>("dashboard");
+  const [targetRoleParam, setTargetRoleParam] = useState<UserRole | null>(null);
 
-  function handleRoleLogin(selectedRole?: UserRole) {
-    const r = selectedRole || role;
-    setRole(r);
-    setScreen(DEMO_ROLES[r].targetScreen);
+  const role: UserRole = userRole || "patient";
+
+  // Sync with URL Hash for real client-side routing & deep-links
+  useEffect(() => {
+    function parseHash() {
+      const hash = window.location.hash.replace(/^#\/?/, "");
+      if (!hash) {
+        if (!isAuthenticated) {
+          window.location.hash = "#/login";
+        } else {
+          const defaultScr = DEMO_ROLES[userRole || "patient"].targetScreen;
+          window.location.hash = `#/${userRole || "patient"}/${defaultScr}`;
+        }
+        return;
+      }
+
+      const parts = hash.split("/");
+      const first = parts[0];
+      const second = parts[1];
+
+      if (first === "login") {
+        setAuthFlow("login");
+        if (second && ["patient", "doctor", "hospital", "pharmacy", "lab", "admin"].includes(second)) {
+          setActiveAuthRole(second as UserRole);
+        } else {
+          setActiveAuthRole(null);
+        }
+        return;
+      }
+
+      if (first === "register") {
+        setAuthFlow("register");
+        if (second && ["patient", "doctor", "hospital", "pharmacy", "lab"].includes(second)) {
+          setActiveAuthRole(second as UserRole);
+        } else {
+          setActiveAuthRole("patient");
+        }
+        return;
+      }
+
+      const potentialRole = first as UserRole;
+      const potentialScreen = second as ScreenType;
+      if (["patient", "doctor", "hospital", "pharmacy", "lab", "admin"].includes(potentialRole)) {
+        setTargetRoleParam(potentialRole);
+        if (potentialScreen) {
+          setScreen(potentialScreen);
+        } else {
+          setScreen(DEMO_ROLES[potentialRole].targetScreen);
+        }
+      }
+    }
+
+    parseHash();
+    window.addEventListener("hashchange", parseHash);
+    return () => window.removeEventListener("hashchange", parseHash);
+  }, [isAuthenticated, userRole]);
+
+  function navigateTo(newScreen: ScreenType, requestedRole?: UserRole) {
+    if (newScreen === "login") {
+      logout();
+      setActiveAuthRole(null);
+      setAuthFlow("login");
+      window.location.hash = "#/login";
+      return;
+    }
+
+    if (newScreen === "register") {
+      setAuthFlow("register");
+      window.location.hash = "#/register";
+      return;
+    }
+
+    const effectiveRole = requestedRole || userRole || "patient";
+    setTargetRoleParam(effectiveRole);
+    setScreen(newScreen);
+    window.location.hash = `#/${effectiveRole}/${newScreen}`;
   }
 
-  function handleSelectRole(newRole: UserRole) {
-    setRole(newRole);
-    setScreen(DEMO_ROLES[newRole].targetScreen);
+  function handleLogout() {
+    logout();
+    setActiveAuthRole(null);
+    setAuthFlow("login");
+    window.location.hash = "#/login";
   }
 
-  if (screen === "login") {
+  // ═══ UNAUTHENTICATED EXPERIENCE: PROFESSIONAL MEDIKIOSK LOGIN / REGISTER ═══
+  if (!isAuthenticated) {
+    if (authFlow === "register") {
+      if (activeAuthRole === "doctor") {
+        return (
+          <DoctorRegistration
+            onBack={() => {
+              setAuthFlow("login");
+              setActiveAuthRole("doctor");
+              window.location.hash = "#/login/doctor";
+            }}
+            onDashboard={() => {
+              login("doctor");
+              navigateTo("doctor", "doctor");
+            }}
+          />
+        );
+      }
+      if (activeAuthRole === "hospital") {
+        return (
+          <HospitalRegistration
+            onBack={() => {
+              setAuthFlow("login");
+              setActiveAuthRole("hospital");
+              window.location.hash = "#/login/hospital";
+            }}
+          />
+        );
+      }
+      if (activeAuthRole === "pharmacy") {
+        return (
+          <PharmacyRegistration
+            onBack={() => {
+              setAuthFlow("login");
+              setActiveAuthRole("pharmacy");
+              window.location.hash = "#/login/pharmacy";
+            }}
+            onComplete={() => {
+              setAuthFlow("login");
+              setActiveAuthRole("pharmacy");
+              window.location.hash = "#/login/pharmacy";
+            }}
+          />
+        );
+      }
+      if (activeAuthRole === "lab") {
+        return (
+          <LabRegistration
+            onBack={() => {
+              setAuthFlow("login");
+              setActiveAuthRole("lab");
+              window.location.hash = "#/login/lab";
+            }}
+            onComplete={() => {
+              setAuthFlow("login");
+              setActiveAuthRole("lab");
+              window.location.hash = "#/login/lab";
+            }}
+          />
+        );
+      }
+      return (
+        <Register
+          onSignIn={() => {
+            setAuthFlow("login");
+            setActiveAuthRole("patient");
+            window.location.hash = "#/login/patient";
+          }}
+        />
+      );
+    }
+
+    // Role-specific login screen or account type chooser
+    if (activeAuthRole === "patient") {
+      return (
+        <PatientLogin
+          onBack={() => {
+            setActiveAuthRole(null);
+            window.location.hash = "#/login";
+          }}
+          onRegister={() => {
+            setAuthFlow("register");
+            window.location.hash = "#/register/patient";
+          }}
+          onSuccess={() => {
+            login("patient");
+            navigateTo("dashboard", "patient");
+          }}
+        />
+      );
+    }
+
+    if (activeAuthRole === "doctor") {
+      return (
+        <DoctorLogin
+          onBack={() => {
+            setActiveAuthRole(null);
+            window.location.hash = "#/login";
+          }}
+          onRegister={() => {
+            setAuthFlow("register");
+            window.location.hash = "#/register/doctor";
+          }}
+          onSuccess={() => {
+            login("doctor");
+            navigateTo("doctor", "doctor");
+          }}
+        />
+      );
+    }
+
+    if (activeAuthRole === "hospital") {
+      return (
+        <HospitalLogin
+          onBack={() => {
+            setActiveAuthRole(null);
+            window.location.hash = "#/login";
+          }}
+          onRegister={() => {
+            setAuthFlow("register");
+            window.location.hash = "#/register/hospital";
+          }}
+          onSuccess={() => {
+            login("hospital");
+            navigateTo("hospital-dash", "hospital");
+          }}
+        />
+      );
+    }
+
+    if (activeAuthRole === "pharmacy") {
+      return (
+        <PharmacyLogin
+          onBack={() => {
+            setActiveAuthRole(null);
+            window.location.hash = "#/login";
+          }}
+          onRegister={() => {
+            setAuthFlow("register");
+            window.location.hash = "#/register/pharmacy";
+          }}
+          onSuccess={() => {
+            login("pharmacy");
+            navigateTo("pharmacy-dash", "pharmacy");
+          }}
+        />
+      );
+    }
+
+    if (activeAuthRole === "lab") {
+      return (
+        <LabLogin
+          onBack={() => {
+            setActiveAuthRole(null);
+            window.location.hash = "#/login";
+          }}
+          onRegister={() => {
+            setAuthFlow("register");
+            window.location.hash = "#/register/lab";
+          }}
+          onSuccess={() => {
+            login("lab");
+            navigateTo("lab-dash", "lab");
+          }}
+        />
+      );
+    }
+
+    if (activeAuthRole === "admin") {
+      return (
+        <AdminLogin
+          onBack={() => {
+            setActiveAuthRole(null);
+            window.location.hash = "#/login";
+          }}
+          onSuccess={() => {
+            login("admin");
+            navigateTo("admin", "admin");
+          }}
+        />
+      );
+    }
+
+    // Default unauthenticated entry: Professional Account Type Select Screen
     return (
-      <Login
-        initialRole={role}
-        onLogin={(r) => handleRoleLogin(r)}
-        onRegister={() => setScreen("register")}
+      <AccountTypeSelect
+        onSelectRole={(r) => {
+          setActiveAuthRole(r);
+          setAuthFlow("login");
+          window.location.hash = `#/login/${r}`;
+        }}
+        onSelectRegister={(r) => {
+          setActiveAuthRole(r);
+          setAuthFlow("register");
+          window.location.hash = `#/register/${r}`;
+        }}
+        onQuickDemoLogin={(r) => {
+          login(r);
+          navigateTo(DEMO_ROLES[r].targetScreen, r);
+        }}
       />
     );
   }
 
   function renderCurrentScreen() {
     if (screen === "register") {
-      return <Register onSignIn={() => setScreen("login")} />;
+      return <Register onSignIn={() => navigateTo(DEMO_ROLES[role].targetScreen)} />;
     }
 
     if (screen === "consent") {
       return (
         <Consent
-          onContinue={() => setScreen("checkin")}
-          onBack={() => setScreen(role === "patient" ? "dashboard" : "login")}
+          onContinue={() => navigateTo("checkin")}
+          onBack={() => navigateTo("dashboard")}
         />
       );
     }
@@ -568,8 +799,8 @@ export default function App() {
     if (screen === "checkin") {
       return (
         <CheckIn
-          onContinue={() => setScreen("intake")}
-          onBack={() => setScreen("consent")}
+          onContinue={() => navigateTo("intake")}
+          onBack={() => navigateTo("consent")}
         />
       );
     }
@@ -577,8 +808,8 @@ export default function App() {
     if (screen === "intake") {
       return (
         <ClinicalIntake
-          onContinue={() => setScreen("summary")}
-          onBack={() => setScreen("checkin")}
+          onContinue={() => navigateTo("summary")}
+          onBack={() => navigateTo("checkin")}
         />
       );
     }
@@ -586,8 +817,8 @@ export default function App() {
     if (screen === "summary") {
       return (
         <ClinicalSummary
-          onBack={() => setScreen("intake")}
-          onDashboard={() => setScreen("dashboard")}
+          onBack={() => navigateTo("intake")}
+          onDashboard={() => navigateTo("dashboard")}
         />
       );
     }
@@ -595,31 +826,33 @@ export default function App() {
     if (screen === "doctor") {
       return (
         <DoctorDashboard
-          onLogout={() => setScreen("login")}
-          onOpenRecord={() => setScreen("record")}
-          onStartConsult={() => setScreen("consult")}
-          onCreateRx={() => setScreen("prescription")}
+          hideSidebar={true}
+          onLogout={() => navigateTo("login")}
+          onOpenRecord={() => navigateTo("record")}
+          onStartConsult={() => navigateTo("consult")}
+          onCreateRx={() => navigateTo("prescription")}
+          onNavigate={(s) => navigateTo(s as ScreenType)}
         />
       );
     }
 
     if (screen === "record") {
-      return <PatientRecord onBack={() => setScreen(role === "doctor" ? "doctor" : "dashboard")} />;
+      return <PatientRecord onBack={() => navigateTo(DEMO_ROLES[role].targetScreen)} />;
     }
 
     if (screen === "consult") {
-      return <ConsultationRoom onEnd={() => setScreen(role === "doctor" ? "doctor" : "dashboard")} />;
+      return <ConsultationRoom onEnd={() => navigateTo(DEMO_ROLES[role].targetScreen)} />;
     }
 
     if (screen === "prescription") {
-      return <CreatePrescription onBack={() => setScreen(role === "doctor" ? "doctor" : "record")} />;
+      return <CreatePrescription onBack={() => navigateTo(role === "doctor" ? "doctor" : "record")} />;
     }
 
     if (screen === "pharmacy") {
       return (
         <Pharmacy
-          onBack={() => setScreen(role === "pharmacy" ? "pharmacy-dash" : "dashboard")}
-          onCheckout={() => setScreen("pharmacy-checkout")}
+          onBack={() => navigateTo(role === "pharmacy" ? "pharmacy-dash" : "dashboard")}
+          onCheckout={() => navigateTo("pharmacy-checkout")}
         />
       );
     }
@@ -627,8 +860,8 @@ export default function App() {
     if (screen === "pharmacy-checkout") {
       return (
         <PharmacyCheckout
-          onBack={() => setScreen("pharmacy")}
-          onSuccess={() => setScreen("order-tracking")}
+          onBack={() => navigateTo("pharmacy")}
+          onSuccess={() => navigateTo("order-tracking")}
         />
       );
     }
@@ -636,9 +869,9 @@ export default function App() {
     if (screen === "order-tracking") {
       return (
         <OrderTracking
-          onBack={() => setScreen("pharmacy-checkout")}
-          onViewPrescription={() => setScreen("prescription")}
-          onViewTimeline={() => setScreen("timeline")}
+          onBack={() => navigateTo(role === "pharmacy" ? "pharmacy-dash" : "dashboard")}
+          onViewPrescription={() => navigateTo("prescription")}
+          onViewTimeline={() => navigateTo("timeline")}
         />
       );
     }
@@ -646,93 +879,145 @@ export default function App() {
     if (screen === "lab") {
       return (
         <LabDiagnostics
-          onBack={() => setScreen(role === "lab" ? "lab-dash" : "dashboard")}
-          onViewTimeline={() => setScreen("timeline")}
+          onBack={() => navigateTo(role === "lab" ? "lab-dash" : "dashboard")}
+          onViewTimeline={() => navigateTo("timeline")}
         />
       );
     }
 
     if (screen === "timeline") {
-      return <HealthTimeline onBack={() => setScreen("dashboard")} />;
+      return <HealthTimeline onBack={() => navigateTo(DEMO_ROLES[role].targetScreen)} />;
     }
 
     if (screen === "hospital-reg") {
-      return <HospitalRegistration onBack={() => setScreen(role === "hospital" ? "hospital-dash" : "dashboard")} />;
+      return <HospitalRegistration onBack={() => navigateTo(role === "hospital" ? "hospital-dash" : "dashboard")} />;
     }
 
     if (screen === "hospital-verify") {
-      return <HospitalVerification onBack={() => setScreen(role === "admin" ? "admin" : "dashboard")} />;
+      return <HospitalVerification onBack={() => navigateTo(role === "admin" ? "admin" : "dashboard")} />;
     }
 
     if (screen === "doctor-reg") {
       return (
         <DoctorRegistration
-          onBack={() => setScreen(role === "doctor" ? "doctor" : role === "admin" ? "admin" : "dashboard")}
-          onDashboard={() => setScreen("doctor")}
+          onBack={() => navigateTo(role === "doctor" ? "doctor" : role === "admin" ? "admin" : "dashboard")}
+          onDashboard={() => navigateTo("doctor")}
         />
       );
     }
 
     if (screen === "doctor-approval") {
-      return <DoctorApproval onBack={() => setScreen(role === "hospital" ? "hospital-dash" : role === "admin" ? "admin" : "dashboard")} />;
+      return <DoctorApproval onBack={() => navigateTo(role === "hospital" ? "hospital-dash" : role === "admin" ? "admin" : "dashboard")} />;
+    }
+
+    if (screen === "pharmacy-reg") {
+      return (
+        <PharmacyRegistration
+          onBack={() => navigateTo(role === "pharmacy" ? "pharmacy-dash" : "dashboard")}
+          onComplete={() => navigateTo(role === "pharmacy" ? "pharmacy-dash" : "dashboard")}
+        />
+      );
+    }
+
+    if (screen === "lab-reg") {
+      return (
+        <LabRegistration
+          onBack={() => navigateTo(role === "lab" ? "lab-dash" : "dashboard")}
+          onComplete={() => navigateTo(role === "lab" ? "lab-dash" : "dashboard")}
+        />
+      );
     }
 
     if (screen === "admin") {
-      return <AdminDashboard onBack={() => setScreen("login")} />;
+      return (
+        <AdminDashboard
+          hideSidebar={true}
+          onBack={handleLogout}
+          onNavigate={(s) => navigateTo(s as ScreenType)}
+        />
+      );
     }
 
     if (screen === "pharmacy-dash") {
-      return <PharmacyDashboard onBack={() => setScreen("login")} />;
+      return (
+        <PharmacyDashboard
+          hideSidebar={true}
+          onBack={handleLogout}
+          onNavigate={(s) => navigateTo(s as ScreenType)}
+        />
+      );
     }
 
     if (screen === "lab-dash") {
-      return <LabDashboard onBack={() => setScreen("login")} />;
+      return (
+        <LabDashboard
+          hideSidebar={true}
+          onBack={handleLogout}
+          onNavigate={(s) => navigateTo(s as ScreenType)}
+        />
+      );
     }
 
     if (screen === "hospital-dash") {
-      return <HospitalDashboard onBack={() => setScreen("login")} />;
+      return (
+        <HospitalDashboard
+          hideSidebar={true}
+          onBack={handleLogout}
+          onNavigate={(s) => navigateTo(s as ScreenType)}
+        />
+      );
     }
 
     if (screen === "doctor-profile") {
-      return <DoctorProfile onBack={() => setScreen(role === "doctor" ? "doctor" : "dashboard")} />;
+      return <DoctorProfile onBack={() => navigateTo(role === "doctor" ? "doctor" : "dashboard")} />;
     }
 
     if (screen === "appt-booking") {
-      return <AppointmentBooking onBack={() => setScreen("dashboard")} />;
+      return <AppointmentBooking onBack={() => navigateTo(DEMO_ROLES[role].targetScreen)} />;
+    }
+
+    const placeholderFeatures = [
+      "find-healthcare",
+      "documents",
+      "ai-intelligence",
+      "departments",
+      "inventory",
+      "samples",
+      "payments",
+      "reports",
+      "analytics",
+      "audit-logs",
+      "system-health",
+      "notifications",
+      "settings",
+    ];
+
+    if (placeholderFeatures.includes(screen)) {
+      return (
+        <RolePlaceholders
+          featureId={screen}
+          currentRole={role}
+          onNavigate={(s) => navigateTo(s as ScreenType)}
+          onBack={() => navigateTo(DEMO_ROLES[role].targetScreen)}
+        />
+      );
     }
 
     // Default: Patient Dashboard
+    const patientFirstName = currentUser?.name?.split(" ")[0] || "Rahul";
+    const abhaDisplayId = currentUser?.abhaId || "12-3456-7890-0001";
+
     return (
-      <div style={{ display: "flex", height: "100%", background: "#f5f7fa", fontFamily: "Inter, system-ui, sans-serif", color: "#0f1f3d", overflow: "hidden" }}>
-        <Sidebar
-          active={active}
-          setActive={(v) => {
-            setActive(v);
-            if (v === "dashboard") setScreen("dashboard");
-            if (v === "appointments") setScreen("appt-booking");
-            if (v === "timeline") setScreen("timeline");
-            if (v === "documents") setScreen("record");
-            if (v === "prescriptions") setScreen("prescription");
-            if (v === "pharmacy") setScreen("pharmacy");
-            if (v === "teleconsult") setScreen("consult");
-          }}
-          onLogout={() => setScreen("login")}
+      <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", minWidth: 0, overflow: "hidden" }}>
+        <Header
+          onRegister={() => navigateTo("register")}
+          onApptBooking={() => navigateTo("appt-booking")}
+          onLogout={handleLogout}
+          currentUser={currentUser}
         />
 
-        {/* Main area */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
-          <Header
-            onRegister={() => setScreen("register")}
-            onApptBooking={() => setScreen("appt-booking")}
-            onDoctorView={() => setScreen("doctor")}
-            onHospitalDash={() => setScreen("hospital-dash")}
-            onPharmacyDash={() => setScreen("pharmacy-dash")}
-            onLabDash={() => setScreen("lab-dash")}
-            onAdmin={() => setScreen("admin")}
-          />
-
-          {/* Scrollable content */}
-          <div style={{ flex: 1, overflowY: "auto", padding: "28px 28px 40px" }}>
+        {/* Scrollable content */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "28px 28px 40px" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 284px", gap: 24, maxWidth: 1280 }}>
 
               {/* ── LEFT COLUMN ── */}
@@ -740,7 +1025,7 @@ export default function App() {
 
                 {/* Greeting */}
                 <div>
-                  <h1 style={{ fontSize: 24, fontWeight: 700, color: "#0f1f3d", margin: 0, letterSpacing: "-0.02em" }}>Good morning, Rahul</h1>
+                  <h1 style={{ fontSize: 24, fontWeight: 700, color: "#0f1f3d", margin: 0, letterSpacing: "-0.02em" }}>Good morning, {patientFirstName}</h1>
                   <p style={{ fontSize: 14, color: "#64748b", margin: "4px 0 0", fontWeight: 400 }}>Here's your health overview and upcoming care.</p>
                 </div>
 
@@ -752,13 +1037,13 @@ export default function App() {
                   </div>
                   <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
                     <button
-                      onClick={() => setScreen("consent")}
+                      onClick={() => navigateTo("consent")}
                       style={{ padding: "10px 20px", background: "#0d7a6e", color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", letterSpacing: "0.01em", whiteSpace: "nowrap" }}
                     >
                       Start Check-in
                     </button>
                     <button
-                      onClick={() => setScreen("appt-booking")}
+                      onClick={() => navigateTo("appt-booking")}
                       style={{ padding: "10px 18px", background: "#fff", color: "#0f1f3d", border: "1px solid #d4d9e1", borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: "pointer", whiteSpace: "nowrap" }}
                     >
                       Book Appointment
@@ -779,7 +1064,7 @@ export default function App() {
                   <div style={{ padding: "16px 20px", borderBottom: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span style={{ fontSize: 14, fontWeight: 700, color: "#0f1f3d" }}>Upcoming Appointment</span>
                     <button
-                      onClick={() => setScreen("appt-booking")}
+                      onClick={() => navigateTo("appt-booking")}
                       style={{ fontSize: 12, color: "#0d7a6e", fontWeight: 600, background: "none", border: "none", cursor: "pointer" }}
                     >
                       View all
@@ -789,7 +1074,7 @@ export default function App() {
                     <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
                       {/* Doctor avatar */}
                       <div
-                        onClick={() => setScreen("doctor-profile")}
+                        onClick={() => navigateTo("doctor-profile")}
                         style={{ width: 52, height: 52, borderRadius: 12, background: "#eff6ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 20, fontWeight: 700, color: "#1d4ed8", cursor: "pointer" }}
                         title="View Doctor Profile"
                       >
@@ -798,7 +1083,7 @@ export default function App() {
                       <div style={{ flex: 1 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
                           <span
-                            onClick={() => setScreen("doctor-profile")}
+                            onClick={() => navigateTo("doctor-profile")}
                             style={{ fontSize: 16, fontWeight: 700, color: "#0f1f3d", cursor: "pointer" }}
                           >
                             Dr. Priya Mehta
@@ -822,7 +1107,7 @@ export default function App() {
                         </div>
                       </div>
                       <button
-                        onClick={() => setScreen("consult")}
+                        onClick={() => navigateTo("consult")}
                         style={{ padding: "9px 18px", background: "#0d7a6e", color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", flexShrink: 0 }}
                       >
                         Join Consultation
@@ -836,7 +1121,7 @@ export default function App() {
                   <div style={{ padding: "16px 20px", borderBottom: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span style={{ fontSize: 14, fontWeight: 700, color: "#0f1f3d" }}>Health Timeline</span>
                     <button
-                      onClick={() => setScreen("timeline")}
+                      onClick={() => navigateTo("timeline")}
                       style={{ fontSize: 12, color: "#0d7a6e", fontWeight: 600, background: "none", border: "none", cursor: "pointer" }}
                     >
                       Full history
@@ -890,7 +1175,7 @@ export default function App() {
                     <div style={{ padding: "14px 16px", borderBottom: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between" }}>
                       <span style={{ fontSize: 13, fontWeight: 700, color: "#0f1f3d" }}>Recent Documents</span>
                       <button
-                        onClick={() => setScreen("record")}
+                        onClick={() => navigateTo("record")}
                         style={{ fontSize: 11, color: "#0d7a6e", fontWeight: 600, background: "none", border: "none", cursor: "pointer" }}
                       >
                         All
@@ -909,7 +1194,7 @@ export default function App() {
                     <div style={{ padding: "14px 16px", borderBottom: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between" }}>
                       <span style={{ fontSize: 13, fontWeight: 700, color: "#0f1f3d" }}>Recent Prescriptions</span>
                       <button
-                        onClick={() => setScreen("prescription")}
+                        onClick={() => navigateTo("prescription")}
                         style={{ fontSize: 11, color: "#0d7a6e", fontWeight: 600, background: "none", border: "none", cursor: "pointer" }}
                       >
                         All
@@ -938,7 +1223,7 @@ export default function App() {
                   <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 10 }}>
                     <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a" }} />
                     <span style={{ fontSize: 12, fontWeight: 600, color: "#16a34a" }}>Connected</span>
-                    <span style={{ fontSize: 11, color: "#94a3b8", marginLeft: 4 }}>ID: 12-3456-7890-0001</span>
+                    <span style={{ fontSize: 11, color: "#94a3b8", marginLeft: 4 }}>ID: {abhaDisplayId}</span>
                   </div>
                   <div style={{ fontSize: 11, color: "#64748b", marginBottom: 8, lineHeight: 1.5 }}>
                     Health records are accessed through your explicit consent. No records are stored centrally without your permission.
@@ -952,7 +1237,7 @@ export default function App() {
                     <span style={{ color: "#0f1f3d", fontWeight: 500 }}>Today, 7:12 AM</span>
                   </div>
                   <button
-                    onClick={() => setScreen("consent")}
+                    onClick={() => navigateTo("consent")}
                     style={{ width: "100%", padding: "8px", background: "#f0fdf9", color: "#0d7a6e", border: "1px solid #b2e8e0", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer" }}
                   >
                     Manage Consent
@@ -969,22 +1254,51 @@ export default function App() {
             </div>
           </div>
         </div>
-      </div>
     );
   }
 
+  // ═══ ROLE-BASED ACCESS CONTROL (RBAC) GUARD ═══
+  const requestedRole = targetRoleParam || role;
+  const isCrossRoleAttempt = requestedRole !== role && role !== "admin";
+  const hasScreenPermission = canAccessScreen(role, screen);
+
+  function renderGuardedViewport() {
+    if (isCrossRoleAttempt || !hasScreenPermission) {
+      return (
+        <AccessRestricted
+          targetRole={requestedRole}
+          attemptedScreen={screen}
+          onReturnDashboard={() => navigateTo(DEMO_ROLES[role].targetScreen, role)}
+          onLogout={handleLogout}
+        />
+      );
+    }
+
+    return renderCurrentScreen();
+  }
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden", background: "#f5f7fa" }}>
-      <UniversalNavBar
-        role={role}
-        screen={screen}
-        onSelectRole={handleSelectRole}
-        onSelectScreen={(s) => setScreen(s)}
-        onLogout={() => setScreen("login")}
+    <div style={{ display: "flex", height: "100vh", overflow: "hidden", background: "#f5f7fa" }}>
+      {/* Real Dynamic Working Left Sidebar */}
+      <RoleSidebar
+        currentRole={role}
+        activeScreen={screen}
+        onNavigate={(s) => navigateTo(s as ScreenType, role)}
+        onLogout={handleLogout}
       />
-      <div style={{ flex: 1, minHeight: 0, overflow: "hidden", position: "relative" }}>
-        {renderCurrentScreen()}
+
+      {/* Screen Viewport */}
+      <div style={{ flex: 1, minWidth: 0, height: "100%", overflow: "hidden", position: "relative", display: "flex", flexDirection: "column" }}>
+        {renderGuardedViewport()}
       </div>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <MediKioskApp />
+    </AuthProvider>
   );
 }

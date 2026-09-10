@@ -192,9 +192,9 @@ function CardHeader({ title, sub, right }: { title: string; sub?: string; right?
   );
 }
 
-function ViewAll({ label = "View all" }: { label?: string }) {
+function ViewAll({ label = "View all", onClick }: { label?: string; onClick?: () => void }) {
   return (
-    <button style={{ fontSize: 11, fontWeight: 600, color: T.primary, background: "none", border: "none", cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
+    <button onClick={onClick} style={{ fontSize: 11, fontWeight: 600, color: T.primary, background: "none", border: "none", cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
       {label} <Icon d={ic.arrowRight} size={12} stroke={T.primary} />
     </button>
   );
@@ -260,7 +260,15 @@ function WeeklyChart() {
 }
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
-export default function LabDashboard({ onBack }: { onBack: () => void }) {
+export default function LabDashboard({
+  onBack,
+  hideSidebar = false,
+  onNavigate,
+}: {
+  onBack: () => void;
+  hideSidebar?: boolean;
+  onNavigate?: (s: string) => void;
+}) {
   const [activeNav, setActiveNav]     = useState("dashboard");
   const [sFocus,    setSFocus]        = useState(false);
   const [searchQ,   setSearchQ]       = useState("");
@@ -268,9 +276,10 @@ export default function LabDashboard({ onBack }: { onBack: () => void }) {
   const [processed, setProcessed]     = useState<string[]>([]);
 
   return (
-    <div style={{ display: "flex", height: "100vh", background: T.bg, fontFamily: "Inter, system-ui, sans-serif", color: T.navy, overflow: "hidden" }}>
+    <div style={{ display: "flex", height: hideSidebar ? "100%" : "100vh", background: T.bg, fontFamily: "Inter, system-ui, sans-serif", color: T.navy, overflow: "hidden", width: "100%" }}>
 
       {/* ═══ SIDEBAR ═══ */}
+      {!hideSidebar && (
       <aside style={{ width: 210, minWidth: 210, background: T.navy, display: "flex", flexDirection: "column", height: "100vh", flexShrink: 0 }}>
         {/* Logo */}
         <div style={{ padding: "18px 14px 14px", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
@@ -290,7 +299,18 @@ export default function LabDashboard({ onBack }: { onBack: () => void }) {
           {NAV.map((item) => {
             const active = activeNav === item.id;
             return (
-              <button key={item.id} onClick={() => setActiveNav(item.id)}
+              <button key={item.id} onClick={() => {
+                setActiveNav(item.id);
+                if (onNavigate) {
+                  if (item.id === "patients") onNavigate("record");
+                  else if (item.id === "reports" || item.id === "orders" || item.id === "samples" || item.id === "catalogue") onNavigate("lab");
+                  else if (item.id === "appts") onNavigate("appt-booking");
+                  else if (item.id === "payments") onNavigate("payments");
+                  else if (item.id === "analytics") onNavigate("reports");
+                  else if (item.id === "notif") onNavigate("notifications");
+                  else if (item.id === "settings") onNavigate("settings");
+                }
+              }}
                 style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, padding: "7px 9px", borderRadius: 7, border: "none", cursor: "pointer", background: active ? "rgba(13,122,110,0.22)" : "transparent", color: active ? "#5dd6c8" : "rgba(255,255,255,0.52)", fontSize: 12, fontWeight: active ? 600 : 400, textAlign: "left" as const, transition: "all 0.12s", marginBottom: 1, fontFamily: "Inter, system-ui, sans-serif" }}>
                 <span style={{ opacity: active ? 1 : 0.7, flexShrink: 0 }}>
                   <Icon d={item.icon} size={14} stroke="currentColor" />
@@ -323,6 +343,7 @@ export default function LabDashboard({ onBack }: { onBack: () => void }) {
           </div>
         </div>
       </aside>
+      )}
 
       {/* ═══ MAIN ═══ */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
@@ -421,7 +442,7 @@ export default function LabDashboard({ onBack }: { onBack: () => void }) {
                 <CardHeader
                   title="Pending Test Orders"
                   sub={`${TEST_ORDERS.length} orders awaiting processing`}
-                  right={<ViewAll />}
+                  right={<ViewAll onClick={() => onNavigate && onNavigate("lab")} />}
                 />
                 <ColHead cols={["Order ID", "Patient", "Tests Ordered", "Doctor", "Time", "Priority", "Action"]} />
                 {TEST_ORDERS.map((o, i) => {
@@ -442,7 +463,7 @@ export default function LabDashboard({ onBack }: { onBack: () => void }) {
                       <div style={{ padding: "10px 12px", fontSize: 11, color: T.gray }}>{o.time}</div>
                       <div style={{ padding: "10px 12px" }}><Pill label={pc.label} color={pc.color} bg={pc.bg} border={pc.border} /></div>
                       <div style={{ padding: "10px 8px", display: "flex", gap: 6 }}>
-                        <button style={{ padding: "4px 9px", background: T.muted, border: `1px solid ${T.border}`, borderRadius: 6, fontSize: 10, fontWeight: 600, color: T.gray, cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 3 }}>
+                        <button onClick={() => onNavigate && onNavigate("lab")} style={{ padding: "4px 9px", background: T.muted, border: `1px solid ${T.border}`, borderRadius: 6, fontSize: 10, fontWeight: 600, color: T.gray, cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 3 }}>
                           <Icon d={ic.eye} size={10} stroke={T.gray} />View
                         </button>
                         <button
@@ -459,7 +480,7 @@ export default function LabDashboard({ onBack }: { onBack: () => void }) {
 
               {/* ── Sample Collection ── */}
               <Card>
-                <CardHeader title="Sample Collection" sub="Active sample tracking" right={<ViewAll />} />
+                <CardHeader title="Sample Collection" sub="Active sample tracking" right={<ViewAll onClick={() => onNavigate && onNavigate("lab")} />} />
                 <ColHead cols={["Patient", "Test", "Sample Type", "Collection Time", "Status"]} />
                 {SAMPLES.map((s, i) => {
                   const sc = SAMPLE_STATUS[s.status];
@@ -479,7 +500,7 @@ export default function LabDashboard({ onBack }: { onBack: () => void }) {
 
               {/* ── Test Processing ── */}
               <Card>
-                <CardHeader title="Test Processing" sub={`${PROCESSING.length} tests in progress`} right={<ViewAll />} />
+                <CardHeader title="Test Processing" sub={`${PROCESSING.length} tests in progress`} right={<ViewAll onClick={() => onNavigate && onNavigate("lab")} />} />
                 <div>
                   {PROCESSING.map((p, i) => (
                     <div key={i} style={{ padding: "12px 18px", borderBottom: i < PROCESSING.length - 1 ? `1px solid ${T.border}` : "none" }}>
@@ -508,7 +529,7 @@ export default function LabDashboard({ onBack }: { onBack: () => void }) {
 
               {/* ── Reports Ready ── */}
               <Card>
-                <CardHeader title="Reports Ready for Review" sub={`${REPORTS_READY.length} reports awaiting sign-off`} right={<ViewAll />} />
+                <CardHeader title="Reports Ready for Review" sub={`${REPORTS_READY.length} reports awaiting sign-off`} right={<ViewAll onClick={() => onNavigate && onNavigate("lab")} />} />
                 <ColHead cols={["Report ID", "Patient", "Test", "Referring Doctor", "Result", "Actions"]} />
                 {REPORTS_READY.map((r, i) => {
                   const rc = RESULT_STATUS[r.result];
@@ -523,10 +544,10 @@ export default function LabDashboard({ onBack }: { onBack: () => void }) {
                       <div style={{ padding: "10px 12px", fontSize: 11, color: T.gray }}>{r.doc}</div>
                       <div style={{ padding: "10px 12px" }}><Pill label={rc.label} color={rc.color} bg={rc.bg} border={rc.border} /></div>
                       <div style={{ padding: "10px 8px", display: "flex", gap: 6 }}>
-                        <button style={{ padding: "4px 9px", background: T.primary, border: "none", borderRadius: 6, fontSize: 10, fontWeight: 700, color: "#fff", cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif" }}>
+                        <button onClick={() => onNavigate && onNavigate("lab")} style={{ padding: "4px 9px", background: T.primary, border: "none", borderRadius: 6, fontSize: 10, fontWeight: 700, color: "#fff", cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif" }}>
                           Review
                         </button>
-                        <button style={{ padding: "4px 9px", background: T.muted, border: `1px solid ${T.border}`, borderRadius: 6, fontSize: 10, fontWeight: 600, color: T.gray, cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 3 }}>
+                        <button onClick={() => onNavigate && onNavigate("lab")} style={{ padding: "4px 9px", background: T.muted, border: `1px solid ${T.border}`, borderRadius: 6, fontSize: 10, fontWeight: 600, color: T.gray, cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 3 }}>
                           <Icon d={ic.upload} size={10} stroke={T.gray} />Upload
                         </button>
                       </div>
@@ -542,10 +563,10 @@ export default function LabDashboard({ onBack }: { onBack: () => void }) {
                   sub="Available diagnostic tests"
                   right={
                     <div style={{ display: "flex", gap: 8 }}>
-                      <button style={{ padding: "5px 12px", background: T.primary, border: "none", borderRadius: 7, fontSize: 11, fontWeight: 700, color: "#fff", cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 5 }}>
+                      <button onClick={() => onNavigate && onNavigate("lab")} style={{ padding: "5px 12px", background: T.primary, border: "none", borderRadius: 7, fontSize: 11, fontWeight: 700, color: "#fff", cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 5 }}>
                         <Icon d={ic.plus} size={12} stroke="#fff" />Add Test
                       </button>
-                      <ViewAll />
+                      <ViewAll onClick={() => onNavigate && onNavigate("lab")} />
                     </div>
                   }
                 />
@@ -583,12 +604,12 @@ export default function LabDashboard({ onBack }: { onBack: () => void }) {
                 <CardHeader title="Quick Actions" />
                 <div style={{ padding: "14px 18px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                   {[
-                    { label: "Create Test Order", icon: ic.plus,       color: T.primary },
-                    { label: "Register Sample",   icon: ic.samples,    color: T.blue    },
-                    { label: "Upload Report",     icon: ic.upload,     color: T.purple  },
-                    { label: "View Patients",     icon: ic.patients,   color: T.amber   },
+                    { label: "Create Test Order", icon: ic.plus,       color: T.primary, screen: "lab" },
+                    { label: "Register Sample",   icon: ic.samples,    color: T.blue,    screen: "lab" },
+                    { label: "Upload Report",     icon: ic.upload,     color: T.purple,  screen: "lab" },
+                    { label: "View Patients",     icon: ic.patients,   color: T.amber,   screen: "record" },
                   ].map((a) => (
-                    <button key={a.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 7, padding: "12px 8px", background: T.muted, border: `1px solid ${T.border}`, borderRadius: 9, cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif" }}>
+                    <button key={a.label} onClick={() => onNavigate && onNavigate(a.screen)} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 7, padding: "12px 8px", background: T.muted, border: `1px solid ${T.border}`, borderRadius: 9, cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif" }}>
                       <div style={{ width: 30, height: 30, borderRadius: 8, background: a.color + "14", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <Icon d={a.icon} size={15} stroke={a.color} />
                       </div>

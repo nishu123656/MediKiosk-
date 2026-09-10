@@ -187,9 +187,9 @@ function CardHeader({ title, sub, right }: { title: string; sub?: string; right?
   );
 }
 
-function ViewAll() {
+function ViewAll({ onClick }: { onClick?: () => void }) {
   return (
-    <button style={{ fontSize: 11, fontWeight: 600, color: T.primary, background: "none", border: "none", cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
+    <button onClick={onClick} style={{ fontSize: 11, fontWeight: 600, color: T.primary, background: "none", border: "none", cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
       View all <Icon d={ic.arrowRight} size={12} stroke={T.primary} />
     </button>
   );
@@ -280,15 +280,24 @@ function Avatar({ name, color = T.primary, size = 28 }: { name: string; color?: 
 }
 
 // ── Root ───────────────────────────────────────────────────────────────────────
-export default function HospitalDashboard({ onBack }: { onBack: () => void }) {
+export default function HospitalDashboard({
+  onBack,
+  hideSidebar = false,
+  onNavigate,
+}: {
+  onBack: () => void;
+  hideSidebar?: boolean;
+  onNavigate?: (s: string) => void;
+}) {
   const [activeNav, setActiveNav] = useState("dashboard");
   const [searchQ,   setSearchQ]   = useState("");
   const [sFocus,    setSFocus]    = useState(false);
 
   return (
-    <div style={{ display: "flex", height: "100vh", background: T.bg, fontFamily: "Inter, system-ui, sans-serif", color: T.navy, overflow: "hidden" }}>
+    <div style={{ display: "flex", height: hideSidebar ? "100%" : "100vh", background: T.bg, fontFamily: "Inter, system-ui, sans-serif", color: T.navy, overflow: "hidden", width: "100%" }}>
 
       {/* ═══ SIDEBAR ═══ */}
+      {!hideSidebar && (
       <aside style={{ width: 214, minWidth: 214, background: T.navy, display: "flex", flexDirection: "column", height: "100vh", flexShrink: 0 }}>
         {/* Logo */}
         <div style={{ padding: "16px 14px 14px", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
@@ -308,7 +317,24 @@ export default function HospitalDashboard({ onBack }: { onBack: () => void }) {
           {NAV.map((item) => {
             const active = activeNav === item.id;
             return (
-              <button key={item.id} onClick={() => setActiveNav(item.id)}
+              <button key={item.id} onClick={() => {
+                setActiveNav(item.id);
+                if (onNavigate) {
+                  if (item.id === "doctors") onNavigate("doctor-approval");
+                  else if (item.id === "patients") onNavigate("record");
+                  else if (item.id === "appointments") onNavigate("appt-booking");
+                  else if (item.id === "consults") onNavigate("consult");
+                  else if (item.id === "departments") onNavigate("departments");
+                  else if (item.id === "rx") onNavigate("prescription");
+                  else if (item.id === "pharmacy") onNavigate("pharmacy-dash");
+                  else if (item.id === "lab") onNavigate("lab-dash");
+                  else if (item.id === "records") onNavigate("record");
+                  else if (item.id === "staff") onNavigate("doctor-reg");
+                  else if (item.id === "reports") onNavigate("reports");
+                  else if (item.id === "notif") onNavigate("notifications");
+                  else if (item.id === "settings") onNavigate("hospital-reg");
+                }
+              }}
                 style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, padding: "7px 9px", borderRadius: 7, border: "none", cursor: "pointer", background: active ? "rgba(13,122,110,0.22)" : "transparent", color: active ? "#5dd6c8" : "rgba(255,255,255,0.52)", fontSize: 12, fontWeight: active ? 600 : 400, textAlign: "left" as const, transition: "all 0.12s", marginBottom: 1, fontFamily: "Inter, system-ui, sans-serif" }}>
                 <span style={{ opacity: active ? 1 : 0.7, flexShrink: 0 }}>
                   <Icon d={item.icon} size={14} stroke="currentColor" />
@@ -340,6 +366,7 @@ export default function HospitalDashboard({ onBack }: { onBack: () => void }) {
           </div>
         </div>
       </aside>
+      )}
 
       {/* ═══ MAIN ═══ */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
@@ -404,13 +431,13 @@ export default function HospitalDashboard({ onBack }: { onBack: () => void }) {
                 <CardHeader title="Quick Actions" />
                 <div style={{ padding: "14px 18px", display: "flex", gap: 10, flexWrap: "wrap" as const }}>
                   {[
-                    { label: "Register Patient",   icon: ic.plus,    color: T.primary },
-                    { label: "Add Doctor",          icon: ic.doctors, color: T.blue    },
-                    { label: "Create Appointment",  icon: ic.appts,   color: T.purple  },
-                    { label: "Start Consultation",  icon: ic.consults,color: T.success  },
-                    { label: "Order Lab Test",      icon: ic.lab,     color: T.amber   },
+                    { label: "Register Patient",   icon: ic.plus,    color: T.primary, screen: "register" },
+                    { label: "Add Doctor",          icon: ic.doctors, color: T.blue,    screen: "doctor-reg" },
+                    { label: "Create Appointment",  icon: ic.appts,   color: T.purple,  screen: "appt-booking" },
+                    { label: "Start Consultation",  icon: ic.consults,color: T.success, screen: "consult" },
+                    { label: "Order Lab Test",      icon: ic.lab,     color: T.amber,   screen: "lab-dash" },
                   ].map((a) => (
-                    <button key={a.label} style={{ display: "flex", alignItems: "center", gap: 7, padding: "8px 14px", background: a.color + "10", border: `1px solid ${a.color}28`, borderRadius: 8, cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", fontSize: 12, fontWeight: 600, color: a.color }}>
+                    <button key={a.label} onClick={() => onNavigate && onNavigate(a.screen)} style={{ display: "flex", alignItems: "center", gap: 7, padding: "8px 14px", background: a.color + "10", border: `1px solid ${a.color}28`, borderRadius: 8, cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", fontSize: 12, fontWeight: 600, color: a.color }}>
                       <Icon d={a.icon} size={13} stroke={a.color} />
                       {a.label}
                     </button>
@@ -420,7 +447,7 @@ export default function HospitalDashboard({ onBack }: { onBack: () => void }) {
 
               {/* Today's Appointments */}
               <Card>
-                <CardHeader title="Today's Appointments" sub={`${APPOINTMENTS.length} scheduled · Sep 10, 2026`} right={<ViewAll />} />
+                <CardHeader title="Today's Appointments" sub={`${APPOINTMENTS.length} scheduled · Sep 10, 2026`} right={<ViewAll onClick={() => onNavigate && onNavigate("appt-booking")} />} />
                 <ColHead cols={["Patient", "Doctor", "Department", "Time", "Type", "Status"]} widths="1fr 160px 140px 90px 90px 130px" />
                 {APPOINTMENTS.map((a, i) => {
                   const sc = APPT_STATUS[a.status];
@@ -449,7 +476,7 @@ export default function HospitalDashboard({ onBack }: { onBack: () => void }) {
 
               {/* Patient Queue */}
               <Card>
-                <CardHeader title="Patient Queue" sub={`${QUEUE.length} patients waiting`} right={<ViewAll />} />
+                <CardHeader title="Patient Queue" sub={`${QUEUE.length} patients waiting`} right={<ViewAll onClick={() => onNavigate && onNavigate("doctor")} />} />
                 <ColHead cols={["Token", "Patient", "Doctor", "Priority", "Wait Time", "Action"]} widths="70px 1fr 150px 100px 90px 130px" />
                 {QUEUE.map((q, i) => {
                   const pc = QPRIO[q.priority];
@@ -471,7 +498,7 @@ export default function HospitalDashboard({ onBack }: { onBack: () => void }) {
                         <Icon d={ic.clock} size={11} stroke={T.grayLight} />{q.wait}
                       </div>
                       <div style={{ padding: "9px 8px" }}>
-                        <button style={{ padding: "4px 10px", background: T.primaryLight, border: `1px solid ${T.primaryBorder}`, borderRadius: 6, fontSize: 10, fontWeight: 700, color: T.primary, cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
+                        <button onClick={() => onNavigate && onNavigate("record")} style={{ padding: "4px 10px", background: T.primaryLight, border: `1px solid ${T.primaryBorder}`, borderRadius: 6, fontSize: 10, fontWeight: 700, color: T.primary, cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
                           <Icon d={ic.eye} size={10} stroke={T.primary} />Open Record
                         </button>
                       </div>
@@ -482,7 +509,7 @@ export default function HospitalDashboard({ onBack }: { onBack: () => void }) {
 
               {/* Doctors & Departments */}
               <Card>
-                <CardHeader title="Doctors & Departments" sub="On duty today" right={<ViewAll />} />
+                <CardHeader title="Doctors & Departments" sub="On duty today" right={<ViewAll onClick={() => onNavigate && onNavigate("doctor-approval")} />} />
                 <ColHead cols={["Doctor", "Specialty", "Department", "Status", "Consultations"]} widths="1fr 160px 140px 110px 130px" />
                 {DOCTORS.map((d, i) => (
                   <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 160px 140px 110px 130px", alignItems: "center", borderBottom: i < DOCTORS.length - 1 ? `1px solid ${T.border}` : "none" }}>
@@ -516,16 +543,22 @@ export default function HospitalDashboard({ onBack }: { onBack: () => void }) {
               <Card>
                 <CardHeader title="Clinical Services" sub="Connected to MediKiosk ecosystem" />
                 <div style={{ padding: "14px 18px", display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10 }}>
-                  {SERVICES.map((s) => (
-                    <div key={s.label} style={{ padding: "13px 12px", background: T.muted, border: `1px solid ${T.border}`, borderRadius: 9, textAlign: "center" as const, cursor: "pointer" }}>
-                      <div style={{ width: 32, height: 32, borderRadius: 8, background: s.color + "14", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 8px" }}>
-                        <Icon d={s.icon} size={15} stroke={s.color} />
+                  {SERVICES.map((s) => {
+                    const target = s.label === "Consultation" ? "consult" :
+                      s.label === "Lab Diagnostics" ? "lab-dash" :
+                      s.label === "Pharmacy" ? "pharmacy-dash" :
+                      s.label === "Teleconsultation" ? "consult" : "record";
+                    return (
+                      <div key={s.label} onClick={() => onNavigate && onNavigate(target)} style={{ padding: "13px 12px", background: T.muted, border: `1px solid ${T.border}`, borderRadius: 9, textAlign: "center" as const, cursor: "pointer" }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 8, background: s.color + "14", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 8px" }}>
+                          <Icon d={s.icon} size={15} stroke={s.color} />
+                        </div>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: T.navy, marginBottom: 3 }}>{s.label}</div>
+                        <div style={{ fontSize: 12, fontWeight: 700, color: s.color, marginBottom: 2 }}>{s.value}</div>
+                        <div style={{ fontSize: 10, color: T.grayLight }}>{s.sub}</div>
                       </div>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: T.navy, marginBottom: 3 }}>{s.label}</div>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: s.color, marginBottom: 2 }}>{s.value}</div>
-                      <div style={{ fontSize: 10, color: T.grayLight }}>{s.sub}</div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </Card>
 

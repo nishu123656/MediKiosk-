@@ -32,12 +32,27 @@ export type ScreenType =
   | "hospital-verify"
   | "doctor-reg"
   | "doctor-approval"
+  | "pharmacy-reg"
+  | "lab-reg"
   | "admin"
   | "pharmacy-dash"
   | "lab-dash"
   | "hospital-dash"
   | "doctor-profile"
-  | "appt-booking";
+  | "appt-booking"
+  | "find-healthcare"
+  | "documents"
+  | "ai-intelligence"
+  | "departments"
+  | "inventory"
+  | "samples"
+  | "payments"
+  | "reports"
+  | "analytics"
+  | "audit-logs"
+  | "system-health"
+  | "notifications"
+  | "settings";
 
 export const DEMO_ROLES: Record<UserRole, DemoRoleInfo> = {
   patient: {

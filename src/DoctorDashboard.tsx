@@ -195,10 +195,11 @@ const NAV = [
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 function Sidebar({
-  active, setActive, onLogout, open, onClose,
+  active, setActive, onLogout, open, onClose, onNavigate,
 }: {
   active: string; setActive: (v: string) => void;
   onLogout: () => void; open: boolean; onClose: () => void;
+  onNavigate?: (s: string) => void;
 }) {
   const { isMobile, isTablet } = useViewport();
   const narrow = isMobile || isTablet;
@@ -257,7 +258,17 @@ function Sidebar({
             return (
               <button
                 key={item.id}
-                onClick={() => { setActive(item.id); if (narrow) onClose(); }}
+                onClick={() => {
+                  setActive(item.id);
+                  if (narrow) onClose();
+                  if (onNavigate) {
+                    if (item.id === "appointments") onNavigate("appt-booking");
+                    else if (item.id === "consult" || item.id === "tele") onNavigate("consult");
+                    else if (item.id === "patients" || item.id === "records") onNavigate("record");
+                    else if (item.id === "prescriptions") onNavigate("prescription");
+                    else if (item.id === "settings") onNavigate("settings");
+                  }
+                }}
                 style={{
                   width: "100%", display: "flex", alignItems: "center", gap: 10,
                   padding: "9px 10px", borderRadius: 8, border: "none", cursor: "pointer",
@@ -835,7 +846,21 @@ function PatientPanel({
 }
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
-export default function DoctorDashboard({ onLogout, onOpenRecord, onStartConsult, onCreateRx }: { onLogout: () => void; onOpenRecord?: () => void; onStartConsult?: () => void; onCreateRx?: () => void }) {
+export default function DoctorDashboard({
+  onLogout,
+  onOpenRecord,
+  onStartConsult,
+  onCreateRx,
+  hideSidebar = false,
+  onNavigate,
+}: {
+  onLogout: () => void;
+  onOpenRecord?: () => void;
+  onStartConsult?: () => void;
+  onCreateRx?: () => void;
+  hideSidebar?: boolean;
+  onNavigate?: (s: string) => void;
+}) {
   const { isMobile, isTablet, isDesktop } = useViewport();
   const narrow = isMobile || isTablet;
   const [activeNav, setActiveNav] = useState("queue");
@@ -850,15 +875,22 @@ export default function DoctorDashboard({ onLogout, onOpenRecord, onStartConsult
     if (isMobile) setPanelOpen(true);
   }
 
+  const openRecord = onOpenRecord || (() => onNavigate && onNavigate("record"));
+  const startConsult = onStartConsult || (() => onNavigate && onNavigate("consult"));
+  const createRx = onCreateRx || (() => onNavigate && onNavigate("prescription"));
+
   return (
     <div style={{
-      display: "flex", height: "100vh", background: T.bg,
-      fontFamily: "Inter, system-ui, sans-serif", color: T.navy, overflow: "hidden",
+      display: "flex", height: hideSidebar ? "100%" : "100vh", background: T.bg,
+      fontFamily: "Inter, system-ui, sans-serif", color: T.navy, overflow: "hidden", width: "100%",
     }}>
-      <Sidebar
-        active={activeNav} setActive={setActiveNav} onLogout={onLogout}
-        open={sidebarOpen} onClose={() => setSidebarOpen(false)}
-      />
+      {!hideSidebar && (
+        <Sidebar
+          active={activeNav} setActive={setActiveNav} onLogout={onLogout}
+          open={sidebarOpen} onClose={() => setSidebarOpen(false)}
+          onNavigate={onNavigate}
+        />
+      )}
 
       {/* Mobile patient panel overlay */}
       {isMobile && panelOpen && selectedPatient && (
@@ -872,7 +904,7 @@ export default function DoctorDashboard({ onLogout, onOpenRecord, onStartConsult
             boxShadow: "0 -4px 24px rgba(0,0,0,0.15)",
           }}>
             <div style={{ width: 36, height: 4, background: T.border, borderRadius: 2, margin: "0 auto 16px" }} />
-            <PatientPanel patient={selectedPatient} onClose={() => setPanelOpen(false)} onOpenRecord={onOpenRecord} onStartConsult={onStartConsult} onCreateRx={onCreateRx} />
+            <PatientPanel patient={selectedPatient} onClose={() => setPanelOpen(false)} onOpenRecord={openRecord} onStartConsult={startConsult} onCreateRx={createRx} />
           </div>
         </>
       )}
@@ -917,14 +949,14 @@ export default function DoctorDashboard({ onLogout, onOpenRecord, onStartConsult
             />
             {/* Panel — only on tablet+ */}
             {!isMobile && (
-              <PatientPanel patient={selectedPatient} onOpenRecord={onOpenRecord} onStartConsult={onStartConsult} onCreateRx={onCreateRx} />
+              <PatientPanel patient={selectedPatient} onOpenRecord={openRecord} onStartConsult={startConsult} onCreateRx={createRx} />
             )}
           </div>
 
           {/* Tablet: panel below table */}
           {isTablet && selectedPatient && (
             <div style={{ marginTop: 20 }}>
-              <PatientPanel patient={selectedPatient} onOpenRecord={onOpenRecord} onStartConsult={onStartConsult} onCreateRx={onCreateRx} />
+              <PatientPanel patient={selectedPatient} onOpenRecord={openRecord} onStartConsult={startConsult} onCreateRx={createRx} />
             </div>
           )}
 

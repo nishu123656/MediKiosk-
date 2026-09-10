@@ -290,15 +290,24 @@ const NETWORK = [
 ];
 
 // ─── Root component ───────────────────────────────────────────────────────────
-export default function AdminDashboard({ onBack }: { onBack: () => void }) {
+export default function AdminDashboard({
+  onBack,
+  hideSidebar = false,
+  onNavigate,
+}: {
+  onBack: () => void;
+  hideSidebar?: boolean;
+  onNavigate?: (s: string) => void;
+}) {
   const [activeNav, setActiveNav] = useState("dashboard");
   const [searchQ,   setSearchQ]   = useState("");
   const [sFocus,    setSFocus]    = useState(false);
 
   return (
-    <div style={{ display: "flex", height: "100vh", background: T.bg, fontFamily: "Inter, system-ui, sans-serif", color: T.navy, overflow: "hidden" }}>
+    <div style={{ display: "flex", height: hideSidebar ? "100%" : "100vh", background: T.bg, fontFamily: "Inter, system-ui, sans-serif", color: T.navy, overflow: "hidden", width: "100%" }}>
 
       {/* ══════════════════════ SIDEBAR ══════════════════════ */}
+      {!hideSidebar && (
       <aside style={{ width: 216, minWidth: 216, background: T.navy, display: "flex", flexDirection: "column", height: "100vh", flexShrink: 0 }}>
         {/* Logo */}
         <div style={{ padding: "20px 16px 16px", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
@@ -321,7 +330,24 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveNav(item.id)}
+                onClick={() => {
+                  setActiveNav(item.id);
+                  if (onNavigate) {
+                    if (item.id === "hospitals" || item.id === "verify") onNavigate("hospital-verify");
+                    else if (item.id === "doctors") onNavigate("doctor-approval");
+                    else if (item.id === "patients") onNavigate("record");
+                    else if (item.id === "pharmacies") onNavigate("pharmacy-dash");
+                    else if (item.id === "labs") onNavigate("lab-dash");
+                    else if (item.id === "appts") onNavigate("appt-booking");
+                    else if (item.id === "consult") onNavigate("consult");
+                    else if (item.id === "rx") onNavigate("prescription");
+                    else if (item.id === "orders") onNavigate("order-tracking");
+                    else if (item.id === "abha") onNavigate("abha");
+                    else if (item.id === "audit") onNavigate("audit");
+                    else if (item.id === "syshealth") onNavigate("reports");
+                    else if (item.id === "settings") onNavigate("settings");
+                  }
+                }}
                 style={{
                   width: "100%", display: "flex", alignItems: "center", gap: 9,
                   padding: "8px 9px", borderRadius: 7, border: "none", cursor: "pointer",
@@ -366,6 +392,7 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
           </div>
         </div>
       </aside>
+      )}
 
       {/* ══════════════════════ MAIN AREA ══════════════════════ */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
@@ -443,7 +470,7 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                     <span style={{ fontSize: 13, fontWeight: 700, color: T.navy }}>Pending Verifications</span>
                     <span style={{ fontSize: 10, fontWeight: 700, color: T.danger, background: T.dangerLight, border: `1px solid ${T.dangerBorder}`, padding: "1px 7px", borderRadius: 12 }}>24 pending</span>
                   </div>
-                  <button style={{ fontSize: 11, fontWeight: 600, color: T.primary, background: "none", border: "none", cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
+                  <button onClick={() => onNavigate && onNavigate("hospital-verify")} style={{ fontSize: 11, fontWeight: 600, color: T.primary, background: "none", border: "none", cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
                     View all <Icon d={ic.arrowRight} size={12} stroke={T.primary} />
                   </button>
                 </div>
@@ -470,7 +497,7 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
                       <div style={{ padding: "10px 14px", fontSize: 11, color: T.gray }}>{v.location}</div>
                       <div style={{ padding: "10px 14px", fontSize: 11, color: T.gray }}>{v.submitted}</div>
                       <div style={{ padding: "10px 10px" }}>
-                        <button style={{ padding: "4px 12px", background: T.primaryLight, border: `1px solid ${T.primaryBorder}`, borderRadius: 7, fontSize: 11, fontWeight: 600, color: T.primary, cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif" }}>
+                        <button onClick={() => onNavigate && onNavigate(v.type === "hospital" ? "hospital-verify" : "doctor-approval")} style={{ padding: "4px 12px", background: T.primaryLight, border: `1px solid ${T.primaryBorder}`, borderRadius: 7, fontSize: 11, fontWeight: 600, color: T.primary, cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif" }}>
                           Review
                         </button>
                       </div>
@@ -626,7 +653,7 @@ export default function AdminDashboard({ onBack }: { onBack: () => void }) {
               <Card>
                 <div style={{ padding: "14px 18px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span style={{ fontSize: 13, fontWeight: 700, color: T.navy }}>Recent Audit Activity</span>
-                  <button style={{ fontSize: 11, fontWeight: 600, color: T.primary, background: "none", border: "none", cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
+                  <button onClick={() => onNavigate && onNavigate("audit")} style={{ fontSize: 11, fontWeight: 600, color: T.primary, background: "none", border: "none", cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
                     Full log <Icon d={ic.arrowRight} size={12} stroke={T.primary} />
                   </button>
                 </div>

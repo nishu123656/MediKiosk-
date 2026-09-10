@@ -179,9 +179,9 @@ function CardHeader({ title, right, sub }: { title: string; right?: React.ReactN
   );
 }
 
-function ViewAll({ label = "View all" }: { label?: string }) {
+function ViewAll({ label = "View all", onClick }: { label?: string; onClick?: () => void }) {
   return (
-    <button style={{ fontSize: 11, fontWeight: 600, color: T.primary, background: "none", border: "none", cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
+    <button onClick={onClick} style={{ fontSize: 11, fontWeight: 600, color: T.primary, background: "none", border: "none", cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
       {label} <Icon d={ic.arrowRight} size={12} stroke={T.primary} />
     </button>
   );
@@ -235,7 +235,15 @@ function RevenueChart() {
 }
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
-export default function PharmacyDashboard({ onBack }: { onBack: () => void }) {
+export default function PharmacyDashboard({
+  onBack,
+  hideSidebar = false,
+  onNavigate,
+}: {
+  onBack: () => void;
+  hideSidebar?: boolean;
+  onNavigate?: (s: string) => void;
+}) {
   const [activeNav,  setActiveNav]  = useState("dashboard");
   const [orderTab,   setOrderTab]   = useState<OrdStatus | "all">("all");
   const [searchQ,    setSearchQ]    = useState("");
@@ -256,9 +264,10 @@ export default function PharmacyDashboard({ onBack }: { onBack: () => void }) {
     : ORDERS.filter((o) => o.status === orderTab);
 
   return (
-    <div style={{ display: "flex", height: "100vh", background: T.bg, fontFamily: "Inter, system-ui, sans-serif", color: T.navy, overflow: "hidden" }}>
+    <div style={{ display: "flex", height: hideSidebar ? "100%" : "100vh", background: T.bg, fontFamily: "Inter, system-ui, sans-serif", color: T.navy, overflow: "hidden", width: "100%" }}>
 
       {/* ══════════ SIDEBAR ══════════ */}
+      {!hideSidebar && (
       <aside style={{ width: 210, minWidth: 210, background: T.navy, display: "flex", flexDirection: "column", height: "100vh", flexShrink: 0 }}>
         {/* Logo */}
         <div style={{ padding: "18px 14px 14px", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
@@ -279,7 +288,21 @@ export default function PharmacyDashboard({ onBack }: { onBack: () => void }) {
           {NAV.map((item) => {
             const active = activeNav === item.id;
             return (
-              <button key={item.id} onClick={() => setActiveNav(item.id)} style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, padding: "7px 9px", borderRadius: 7, border: "none", cursor: "pointer", background: active ? "rgba(13,122,110,0.22)" : "transparent", color: active ? "#5dd6c8" : "rgba(255,255,255,0.52)", fontSize: 12, fontWeight: active ? 600 : 400, textAlign: "left" as const, transition: "all 0.12s", marginBottom: 1, fontFamily: "Inter, system-ui, sans-serif" }}>
+              <button key={item.id} onClick={() => {
+                setActiveNav(item.id);
+                if (onNavigate) {
+                  if (item.id === "medicines") onNavigate("pharmacy");
+                  else if (item.id === "patients") onNavigate("record");
+                  else if (item.id === "rx") onNavigate("prescription");
+                  else if (item.id === "orders") onNavigate("order-tracking");
+                  else if (item.id === "inventory") onNavigate("inventory");
+                  else if (item.id === "delivery") onNavigate("order-tracking");
+                  else if (item.id === "payments") onNavigate("payments");
+                  else if (item.id === "reports") onNavigate("reports");
+                  else if (item.id === "notif") onNavigate("notifications");
+                  else if (item.id === "settings") onNavigate("settings");
+                }
+              }} style={{ width: "100%", display: "flex", alignItems: "center", gap: 8, padding: "7px 9px", borderRadius: 7, border: "none", cursor: "pointer", background: active ? "rgba(13,122,110,0.22)" : "transparent", color: active ? "#5dd6c8" : "rgba(255,255,255,0.52)", fontSize: 12, fontWeight: active ? 600 : 400, textAlign: "left" as const, transition: "all 0.12s", marginBottom: 1, fontFamily: "Inter, system-ui, sans-serif" }}>
                 <span style={{ opacity: active ? 1 : 0.7, flexShrink: 0 }}>
                   <Icon d={item.icon} size={14} stroke="currentColor" />
                 </span>
@@ -312,6 +335,7 @@ export default function PharmacyDashboard({ onBack }: { onBack: () => void }) {
           </div>
         </div>
       </aside>
+      )}
 
       {/* ══════════ MAIN ══════════ */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
@@ -409,7 +433,7 @@ export default function PharmacyDashboard({ onBack }: { onBack: () => void }) {
                           bg={o.payment === "paid" ? T.successLight : o.payment === "cod" ? T.amberLight : T.dangerLight}
                           border={o.payment === "paid" ? T.successBorder : o.payment === "cod" ? T.amberBorder : T.dangerBorder}
                         />
-                        <button style={{ padding: "4px 10px", background: T.muted, border: `1px solid ${T.border}`, borderRadius: 6, fontSize: 11, fontWeight: 600, color: T.gray, cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
+                        <button onClick={() => onNavigate && onNavigate("prescription")} style={{ padding: "4px 10px", background: T.muted, border: `1px solid ${T.border}`, borderRadius: 6, fontSize: 11, fontWeight: 600, color: T.gray, cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 4 }}>
                           <Icon d={ic.eye} size={11} stroke={T.gray} />
                           View
                         </button>
@@ -431,7 +455,7 @@ export default function PharmacyDashboard({ onBack }: { onBack: () => void }) {
 
               {/* ── Order Management ── */}
               <Card>
-                <CardHeader title="Order Management" right={<ViewAll />} />
+                <CardHeader title="Order Management" right={<ViewAll onClick={() => onNavigate && onNavigate("order-tracking")} />} />
                 {/* Tabs */}
                 <div style={{ display: "flex", gap: 0, borderBottom: `1px solid ${T.border}`, overflowX: "auto" as const }}>
                   {ORDER_TABS.map((tab) => {
@@ -468,7 +492,7 @@ export default function PharmacyDashboard({ onBack }: { onBack: () => void }) {
                       <div style={{ padding: "9px 12px", fontSize: 11, fontWeight: 600, color: T.navy }}>{o.amount}</div>
                       <div style={{ padding: "9px 12px" }}><Pill label={sc.label} color={sc.color} bg={sc.bg} border={sc.border} /></div>
                       <div style={{ padding: "9px 8px" }}>
-                        <button style={{ padding: "4px 10px", background: T.muted, border: `1px solid ${T.border}`, borderRadius: 6, fontSize: 10, fontWeight: 600, color: T.gray, cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif" }}>
+                        <button onClick={() => onNavigate && onNavigate("order-tracking")} style={{ padding: "4px 10px", background: T.muted, border: `1px solid ${T.border}`, borderRadius: 6, fontSize: 10, fontWeight: 600, color: T.gray, cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif" }}>
                           View
                         </button>
                       </div>
@@ -484,11 +508,11 @@ export default function PharmacyDashboard({ onBack }: { onBack: () => void }) {
                   sub={`${INVENTORY.filter((i) => i.status !== "ok").length} items need attention`}
                   right={
                     <div style={{ display: "flex", gap: 8 }}>
-                      <button style={{ padding: "5px 12px", background: T.primary, border: "none", borderRadius: 7, fontSize: 11, fontWeight: 700, color: "#fff", cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 5 }}>
+                      <button onClick={() => onNavigate && onNavigate("inventory")} style={{ padding: "5px 12px", background: T.primary, border: "none", borderRadius: 7, fontSize: 11, fontWeight: 700, color: "#fff", cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", display: "flex", alignItems: "center", gap: 5 }}>
                         <Icon d={ic.plus} size={12} stroke="#fff" />
                         Add Medicine
                       </button>
-                      <ViewAll />
+                      <ViewAll onClick={() => onNavigate && onNavigate("inventory")} />
                     </div>
                   }
                 />
@@ -536,12 +560,12 @@ export default function PharmacyDashboard({ onBack }: { onBack: () => void }) {
                 <CardHeader title="Quick Actions" />
                 <div style={{ padding: "14px 18px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                   {[
-                    { label: "Add Medicine",      icon: ic.plus,      color: T.primary },
-                    { label: "Update Inventory",  icon: ic.edit,      color: T.blue    },
-                    { label: "View Prescriptions",icon: ic.rx,        color: T.purple  },
-                    { label: "Manage Orders",     icon: ic.orders,    color: T.amber   },
+                    { label: "Add Medicine",      icon: ic.plus,      color: T.primary, screen: "inventory" },
+                    { label: "Update Inventory",  icon: ic.edit,      color: T.blue,    screen: "inventory" },
+                    { label: "View Prescriptions",icon: ic.rx,        color: T.purple,  screen: "prescription" },
+                    { label: "Manage Orders",     icon: ic.orders,    color: T.amber,   screen: "order-tracking" },
                   ].map((a) => (
-                    <button key={a.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 7, padding: "12px 8px", background: T.muted, border: `1px solid ${T.border}`, borderRadius: 9, cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", transition: "all 0.12s" }}>
+                    <button key={a.label} onClick={() => onNavigate && onNavigate(a.screen)} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 7, padding: "12px 8px", background: T.muted, border: `1px solid ${T.border}`, borderRadius: 9, cursor: "pointer", fontFamily: "Inter, system-ui, sans-serif", transition: "all 0.12s" }}>
                       <div style={{ width: 30, height: 30, borderRadius: 8, background: a.color + "14", display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <Icon d={a.icon} size={15} stroke={a.color} />
                       </div>
@@ -553,7 +577,7 @@ export default function PharmacyDashboard({ onBack }: { onBack: () => void }) {
 
               {/* Revenue chart */}
               <Card>
-                <CardHeader title="Revenue Overview" sub="Last 7 days" right={<ViewAll label="Details" />} />
+                <CardHeader title="Revenue Overview" sub="Last 7 days" right={<ViewAll label="Details" onClick={() => onNavigate && onNavigate("reports")} />} />
                 <div style={{ padding: "14px 18px 10px" }}>
                   <RevenueChart />
                   <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${T.border}` }}>
@@ -573,7 +597,7 @@ export default function PharmacyDashboard({ onBack }: { onBack: () => void }) {
 
               {/* Prescription Verification */}
               <Card>
-                <CardHeader title="Prescription Verification" sub="Uploaded prescriptions" right={<ViewAll />} />
+                <CardHeader title="Prescription Verification" sub="Uploaded prescriptions" right={<ViewAll onClick={() => onNavigate && onNavigate("prescription")} />} />
                 <div>
                   {RX_VERIFY.map((r, i) => (
                     <div key={r.id} style={{ padding: "11px 18px", borderBottom: i < RX_VERIFY.length - 1 ? `1px solid ${T.border}` : "none" }}>
