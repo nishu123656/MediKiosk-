@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { UserRole, ScreenType, DEMO_ROLES } from "./types";
+import UniversalNavBar from "./components/UniversalNavBar";
 import Register from "./Register";
 import Login from "./Login";
 import Consent from "./Consent";
@@ -525,335 +527,463 @@ function RxRow({ name, dosage, doctor, date }: { name: string; dosage: string; d
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 export default function App() {
   const [active, setActive] = useState("dashboard");
-  const [screen, setScreen] = useState<"login" | "register" | "consent" | "checkin" | "intake" | "summary" | "dashboard" | "doctor" | "record" | "consult" | "prescription" | "pharmacy" | "pharmacy-checkout" | "order-tracking" | "lab" | "timeline" | "hospital-reg" | "hospital-verify" | "doctor-reg" | "doctor-approval" | "admin" | "pharmacy-dash" | "lab-dash" | "hospital-dash" | "doctor-profile" | "appt-booking">("login");
+  const [role, setRole] = useState<UserRole>("patient");
+  const [screen, setScreen] = useState<ScreenType>("login");
+
+  function handleRoleLogin(selectedRole?: UserRole) {
+    const r = selectedRole || role;
+    setRole(r);
+    setScreen(DEMO_ROLES[r].targetScreen);
+  }
+
+  function handleSelectRole(newRole: UserRole) {
+    setRole(newRole);
+    setScreen(DEMO_ROLES[newRole].targetScreen);
+  }
 
   if (screen === "login") {
     return (
       <Login
-        onLogin={() => setScreen("consent")}
+        initialRole={role}
+        onLogin={(r) => handleRoleLogin(r)}
         onRegister={() => setScreen("register")}
       />
     );
   }
 
-  if (screen === "register") {
-    return <Register onSignIn={() => setScreen("login")} />;
-  }
+  function renderCurrentScreen() {
+    if (screen === "register") {
+      return <Register onSignIn={() => setScreen("login")} />;
+    }
 
-  if (screen === "consent") {
+    if (screen === "consent") {
+      return (
+        <Consent
+          onContinue={() => setScreen("checkin")}
+          onBack={() => setScreen(role === "patient" ? "dashboard" : "login")}
+        />
+      );
+    }
+
+    if (screen === "checkin") {
+      return (
+        <CheckIn
+          onContinue={() => setScreen("intake")}
+          onBack={() => setScreen("consent")}
+        />
+      );
+    }
+
+    if (screen === "intake") {
+      return (
+        <ClinicalIntake
+          onContinue={() => setScreen("summary")}
+          onBack={() => setScreen("checkin")}
+        />
+      );
+    }
+
+    if (screen === "summary") {
+      return (
+        <ClinicalSummary
+          onBack={() => setScreen("intake")}
+          onDashboard={() => setScreen("dashboard")}
+        />
+      );
+    }
+
+    if (screen === "doctor") {
+      return (
+        <DoctorDashboard
+          onLogout={() => setScreen("login")}
+          onOpenRecord={() => setScreen("record")}
+          onStartConsult={() => setScreen("consult")}
+          onCreateRx={() => setScreen("prescription")}
+        />
+      );
+    }
+
+    if (screen === "record") {
+      return <PatientRecord onBack={() => setScreen(role === "doctor" ? "doctor" : "dashboard")} />;
+    }
+
+    if (screen === "consult") {
+      return <ConsultationRoom onEnd={() => setScreen(role === "doctor" ? "doctor" : "dashboard")} />;
+    }
+
+    if (screen === "prescription") {
+      return <CreatePrescription onBack={() => setScreen(role === "doctor" ? "doctor" : "record")} />;
+    }
+
+    if (screen === "pharmacy") {
+      return (
+        <Pharmacy
+          onBack={() => setScreen(role === "pharmacy" ? "pharmacy-dash" : "dashboard")}
+          onCheckout={() => setScreen("pharmacy-checkout")}
+        />
+      );
+    }
+
+    if (screen === "pharmacy-checkout") {
+      return (
+        <PharmacyCheckout
+          onBack={() => setScreen("pharmacy")}
+          onSuccess={() => setScreen("order-tracking")}
+        />
+      );
+    }
+
+    if (screen === "order-tracking") {
+      return (
+        <OrderTracking
+          onBack={() => setScreen("pharmacy-checkout")}
+          onViewPrescription={() => setScreen("prescription")}
+          onViewTimeline={() => setScreen("timeline")}
+        />
+      );
+    }
+
+    if (screen === "lab") {
+      return (
+        <LabDiagnostics
+          onBack={() => setScreen(role === "lab" ? "lab-dash" : "dashboard")}
+          onViewTimeline={() => setScreen("timeline")}
+        />
+      );
+    }
+
+    if (screen === "timeline") {
+      return <HealthTimeline onBack={() => setScreen("dashboard")} />;
+    }
+
+    if (screen === "hospital-reg") {
+      return <HospitalRegistration onBack={() => setScreen(role === "hospital" ? "hospital-dash" : "dashboard")} />;
+    }
+
+    if (screen === "hospital-verify") {
+      return <HospitalVerification onBack={() => setScreen(role === "admin" ? "admin" : "dashboard")} />;
+    }
+
+    if (screen === "doctor-reg") {
+      return (
+        <DoctorRegistration
+          onBack={() => setScreen(role === "doctor" ? "doctor" : role === "admin" ? "admin" : "dashboard")}
+          onDashboard={() => setScreen("doctor")}
+        />
+      );
+    }
+
+    if (screen === "doctor-approval") {
+      return <DoctorApproval onBack={() => setScreen(role === "hospital" ? "hospital-dash" : role === "admin" ? "admin" : "dashboard")} />;
+    }
+
+    if (screen === "admin") {
+      return <AdminDashboard onBack={() => setScreen("login")} />;
+    }
+
+    if (screen === "pharmacy-dash") {
+      return <PharmacyDashboard onBack={() => setScreen("login")} />;
+    }
+
+    if (screen === "lab-dash") {
+      return <LabDashboard onBack={() => setScreen("login")} />;
+    }
+
+    if (screen === "hospital-dash") {
+      return <HospitalDashboard onBack={() => setScreen("login")} />;
+    }
+
+    if (screen === "doctor-profile") {
+      return <DoctorProfile onBack={() => setScreen(role === "doctor" ? "doctor" : "dashboard")} />;
+    }
+
+    if (screen === "appt-booking") {
+      return <AppointmentBooking onBack={() => setScreen("dashboard")} />;
+    }
+
+    // Default: Patient Dashboard
     return (
-      <Consent
-        onContinue={() => setScreen("checkin")}
-        onBack={() => setScreen("login")}
-      />
-    );
-  }
+      <div style={{ display: "flex", height: "100%", background: "#f5f7fa", fontFamily: "Inter, system-ui, sans-serif", color: "#0f1f3d", overflow: "hidden" }}>
+        <Sidebar
+          active={active}
+          setActive={(v) => {
+            setActive(v);
+            if (v === "dashboard") setScreen("dashboard");
+            if (v === "appointments") setScreen("appt-booking");
+            if (v === "timeline") setScreen("timeline");
+            if (v === "documents") setScreen("record");
+            if (v === "prescriptions") setScreen("prescription");
+            if (v === "pharmacy") setScreen("pharmacy");
+            if (v === "teleconsult") setScreen("consult");
+          }}
+          onLogout={() => setScreen("login")}
+        />
 
-  if (screen === "checkin") {
-    return (
-      <CheckIn
-        onContinue={() => setScreen("intake")}
-        onBack={() => setScreen("consent")}
-      />
-    );
-  }
+        {/* Main area */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
+          <Header
+            onRegister={() => setScreen("register")}
+            onApptBooking={() => setScreen("appt-booking")}
+            onDoctorView={() => setScreen("doctor")}
+            onHospitalDash={() => setScreen("hospital-dash")}
+            onPharmacyDash={() => setScreen("pharmacy-dash")}
+            onLabDash={() => setScreen("lab-dash")}
+            onAdmin={() => setScreen("admin")}
+          />
 
-  if (screen === "intake") {
-    return (
-      <ClinicalIntake
-        onContinue={() => setScreen("summary")}
-        onBack={() => setScreen("checkin")}
-      />
-    );
-  }
+          {/* Scrollable content */}
+          <div style={{ flex: 1, overflowY: "auto", padding: "28px 28px 40px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 284px", gap: 24, maxWidth: 1280 }}>
 
-  if (screen === "summary") {
-    return (
-      <ClinicalSummary
-        onBack={() => setScreen("intake")}
-        onDashboard={() => setScreen("dashboard")}
-      />
-    );
-  }
+              {/* ── LEFT COLUMN ── */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 24, minWidth: 0 }}>
 
-  if (screen === "doctor") {
-    return <DoctorDashboard onLogout={() => setScreen("login")} onOpenRecord={() => setScreen("record")} onStartConsult={() => setScreen("consult")} onCreateRx={() => setScreen("prescription")} />;
-  }
-
-  if (screen === "record") {
-    return <PatientRecord onBack={() => setScreen("doctor")} />;
-  }
-
-  if (screen === "consult") {
-    return <ConsultationRoom onEnd={() => setScreen("doctor")} />;
-  }
-
-  if (screen === "prescription") {
-    return <CreatePrescription onBack={() => setScreen("record")} />;
-  }
-
-  if (screen === "pharmacy") {
-    return <Pharmacy onBack={() => setScreen("dashboard")} onCheckout={() => setScreen("pharmacy-checkout")} />;
-  }
-
-  if (screen === "pharmacy-checkout") {
-    return <PharmacyCheckout onBack={() => setScreen("pharmacy")} onSuccess={() => setScreen("order-tracking")} />;
-  }
-
-  if (screen === "order-tracking") {
-    return <OrderTracking onBack={() => setScreen("pharmacy-checkout")} onViewPrescription={() => setScreen("prescription")} onViewTimeline={() => setScreen("dashboard")} />;
-  }
-
-  if (screen === "lab") {
-    return <LabDiagnostics onBack={() => setScreen("dashboard")} onViewTimeline={() => setScreen("timeline")} />;
-  }
-
-  if (screen === "timeline") {
-    return <HealthTimeline onBack={() => setScreen("dashboard")} />;
-  }
-
-  if (screen === "hospital-reg") {
-    return <HospitalRegistration onBack={() => setScreen("dashboard")} />;
-  }
-
-  if (screen === "hospital-verify") {
-    return <HospitalVerification onBack={() => setScreen("dashboard")} />;
-  }
-
-  if (screen === "doctor-reg") {
-    return <DoctorRegistration onBack={() => setScreen("dashboard")} onDashboard={() => setScreen("doctor")} />;
-  }
-
-  if (screen === "doctor-approval") {
-    return <DoctorApproval onBack={() => setScreen("dashboard")} />;
-  }
-
-  if (screen === "admin") {
-    return <AdminDashboard onBack={() => setScreen("dashboard")} />;
-  }
-
-  if (screen === "pharmacy-dash") {
-    return <PharmacyDashboard onBack={() => setScreen("dashboard")} />;
-  }
-
-  if (screen === "lab-dash") {
-    return <LabDashboard onBack={() => setScreen("dashboard")} />;
-  }
-
-  if (screen === "hospital-dash") {
-    return <HospitalDashboard onBack={() => setScreen("dashboard")} />;
-  }
-
-  if (screen === "doctor-profile") {
-    return <DoctorProfile onBack={() => setScreen("dashboard")} />;
-  }
-
-  if (screen === "appt-booking") {
-    return <AppointmentBooking onBack={() => setScreen("dashboard")} />;
-  }
-
-  return (
-    <div style={{ display: "flex", height: "100vh", background: "#f5f7fa", fontFamily: "Inter, system-ui, sans-serif", color: "#0f1f3d", overflow: "hidden" }}>
-      <Sidebar active={active} setActive={(v) => { setActive(v); if (v === "pharmacy") setScreen("pharmacy"); if (v === "timeline") setScreen("timeline"); }} onLogout={() => setScreen("login")} />
-
-      {/* Main area */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
-        <Header onRegister={() => setScreen("register")} onDoctorView={() => setScreen("doctor")} onHospitalReg={() => setScreen("hospital-reg")} onHospitalVerify={() => setScreen("hospital-verify")} onDoctorReg={() => setScreen("doctor-reg")} onDoctorApproval={() => setScreen("doctor-approval")} onAdmin={() => setScreen("admin")} onPharmacyDash={() => setScreen("pharmacy-dash")} onLabDash={() => setScreen("lab-dash")} onHospitalDash={() => setScreen("hospital-dash")} onDoctorProfile={() => setScreen("doctor-profile")} onApptBooking={() => setScreen("appt-booking")} />
-
-        {/* Scrollable content */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "28px 28px 40px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 284px", gap: 24, maxWidth: 1280 }}>
-
-            {/* ── LEFT COLUMN ── */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 24, minWidth: 0 }}>
-
-              {/* Greeting */}
-              <div>
-                <h1 style={{ fontSize: 24, fontWeight: 700, color: "#0f1f3d", margin: 0, letterSpacing: "-0.02em" }}>Good morning, Rahul</h1>
-                <p style={{ fontSize: 14, color: "#64748b", margin: "4px 0 0", fontWeight: 400 }}>Here's your health overview and upcoming care.</p>
-              </div>
-
-              {/* Primary action */}
-              <div style={{ background: "#fff", border: "1px solid #e8ecf0", borderRadius: 12, padding: "20px 24px", display: "flex", alignItems: "center", gap: 20 }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "#0f1f3d", marginBottom: 4 }}>Start a Health Check-in</div>
-                  <div style={{ fontSize: 13, color: "#64748b", lineHeight: 1.5, maxWidth: 480 }}>Tell us what you're experiencing. MediKiosk will collect your symptoms and prepare a structured summary for your doctor.</div>
+                {/* Greeting */}
+                <div>
+                  <h1 style={{ fontSize: 24, fontWeight: 700, color: "#0f1f3d", margin: 0, letterSpacing: "-0.02em" }}>Good morning, Rahul</h1>
+                  <p style={{ fontSize: 14, color: "#64748b", margin: "4px 0 0", fontWeight: 400 }}>Here's your health overview and upcoming care.</p>
                 </div>
-                <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
-                  <button style={{ padding: "10px 20px", background: "#0d7a6e", color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", letterSpacing: "0.01em", whiteSpace: "nowrap" }}>
-                    Start Check-in
-                  </button>
-                  <button style={{ padding: "10px 18px", background: "#fff", color: "#0f1f3d", border: "1px solid #d4d9e1", borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: "pointer", whiteSpace: "nowrap" }}>
-                    Book Appointment
-                  </button>
-                </div>
-              </div>
 
-              {/* Metrics */}
-              <div style={{ display: "flex", gap: 12 }}>
-                <MetricChip label="Total Visits" value="24" sub="Since Jan 2024" color="#0d7a6e" icon={icons.building} />
-                <MetricChip label="Upcoming" value="1" sub="Sep 15, 2026" color="#1d4ed8" icon={icons.appointments} />
-                <MetricChip label="Active Medicines" value="3" sub="Ongoing" color="#7c3aed" icon={icons.pill} />
-                <MetricChip label="Medical Reports" value="12" sub="All time" color="#d97706" icon={icons.fileText} />
-              </div>
-
-              {/* Upcoming Appointment */}
-              <div style={{ background: "#fff", border: "1px solid #e8ecf0", borderRadius: 12, overflow: "hidden" }}>
-                <div style={{ padding: "16px 20px", borderBottom: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: "#0f1f3d" }}>Upcoming Appointment</span>
-                  <button style={{ fontSize: 12, color: "#0d7a6e", fontWeight: 600, background: "none", border: "none", cursor: "pointer" }}>View all</button>
-                </div>
-                <div style={{ padding: "20px" }}>
-                  <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
-                    {/* Doctor avatar */}
-                    <div style={{ width: 52, height: 52, borderRadius: 12, background: "#eff6ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 20, fontWeight: 700, color: "#1d4ed8" }}>M</div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                        <span style={{ fontSize: 16, fontWeight: 700, color: "#0f1f3d" }}>Dr. Priya Mehta</span>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: "#16a34a", background: "#f0fdf4", padding: "2px 10px", borderRadius: 20, border: "1px solid #bbf7d0" }}>Confirmed</span>
-                      </div>
-                      <div style={{ fontSize: 13, color: "#64748b", marginTop: 2 }}>Endocrinologist · Apollo Hospitals, Mumbai</div>
-                      <div style={{ display: "flex", gap: 20, marginTop: 12, flexWrap: "wrap" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <Icon d={icons.appointments} size={14} stroke="#94a3b8" />
-                          <span style={{ fontSize: 13, color: "#0f1f3d", fontWeight: 500 }}>Monday, Sep 15, 2026</span>
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <Icon d={icons.clock} size={14} stroke="#94a3b8" />
-                          <span style={{ fontSize: 13, color: "#0f1f3d", fontWeight: 500 }}>11:30 AM</span>
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                          <Icon d={icons.video} size={14} stroke="#7c3aed" />
-                          <span style={{ fontSize: 13, color: "#7c3aed", fontWeight: 500 }}>Video Consultation</span>
-                        </div>
-                      </div>
-                    </div>
-                    <button style={{ padding: "9px 18px", background: "#0d7a6e", color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", flexShrink: 0 }}>
-                      Join Consultation
+                {/* Primary action */}
+                <div style={{ background: "#fff", border: "1px solid #e8ecf0", borderRadius: 12, padding: "20px 24px", display: "flex", alignItems: "center", gap: 20 }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: "#0f1f3d", marginBottom: 4 }}>Start a Health Check-in</div>
+                    <div style={{ fontSize: 13, color: "#64748b", lineHeight: 1.5, maxWidth: 480 }}>Tell us what you're experiencing. MediKiosk will collect your symptoms and prepare a structured summary for your doctor.</div>
+                  </div>
+                  <div style={{ display: "flex", gap: 10, flexShrink: 0 }}>
+                    <button
+                      onClick={() => setScreen("consent")}
+                      style={{ padding: "10px 20px", background: "#0d7a6e", color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", letterSpacing: "0.01em", whiteSpace: "nowrap" }}
+                    >
+                      Start Check-in
+                    </button>
+                    <button
+                      onClick={() => setScreen("appt-booking")}
+                      style={{ padding: "10px 18px", background: "#fff", color: "#0f1f3d", border: "1px solid #d4d9e1", borderRadius: 8, fontSize: 13, fontWeight: 500, cursor: "pointer", whiteSpace: "nowrap" }}
+                    >
+                      Book Appointment
                     </button>
                   </div>
                 </div>
-              </div>
 
-              {/* Health Timeline */}
-              <div style={{ background: "#fff", border: "1px solid #e8ecf0", borderRadius: 12, overflow: "hidden" }}>
-                <div style={{ padding: "16px 20px", borderBottom: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: "#0f1f3d" }}>Health Timeline</span>
-                  <button style={{ fontSize: 12, color: "#0d7a6e", fontWeight: 600, background: "none", border: "none", cursor: "pointer" }}>Full history</button>
+                {/* Metrics */}
+                <div style={{ display: "flex", gap: 12 }}>
+                  <MetricChip label="Total Visits" value="24" sub="Since Jan 2024" color="#0d7a6e" icon={icons.building} />
+                  <MetricChip label="Upcoming" value="1" sub="Sep 15, 2026" color="#1d4ed8" icon={icons.appointments} />
+                  <MetricChip label="Active Medicines" value="3" sub="Ongoing" color="#7c3aed" icon={icons.pill} />
+                  <MetricChip label="Medical Reports" value="12" sub="All time" color="#d97706" icon={icons.fileText} />
                 </div>
-                <div style={{ padding: "20px" }}>
-                  <TimelineItem type="consultation" title="Endocrinology Consultation" desc="Dr. Priya Mehta · Apollo Hospitals, Mumbai" date="Aug 28, 2026" />
-                  <TimelineItem type="lab" title="HbA1c + Lipid Profile" desc="Thyrocare Labs · 6 results" date="Aug 25, 2026" />
-                  <TimelineItem type="prescription" title="Prescription Updated" desc="Metformin dose adjusted — Dr. Mehta" date="Aug 28, 2026" />
-                  <TimelineItem type="document" title="Discharge Summary Uploaded" desc="Nanavati Hospital · Appendectomy" date="Jul 12, 2026" />
-                  <TimelineItem type="followup" title="Follow-up Scheduled" desc="Dr. Priya Mehta · 3 months review" date="Jun 15, 2026" last />
-                </div>
-              </div>
 
-              {/* Clinical Insight */}
-              <div style={{ background: "#fff", border: "1px solid #e8ecf0", borderLeft: "3px solid #d97706", borderRadius: "0 12px 12px 0", overflow: "hidden" }}>
-                <div style={{ padding: "16px 20px", borderBottom: "1px solid #f1f5f9" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <Icon d={icons.info} size={16} stroke="#d97706" />
-                    <span style={{ fontSize: 14, fontWeight: 700, color: "#0f1f3d" }}>Clinical Insight</span>
-                    <span style={{ fontSize: 10, color: "#94a3b8", marginLeft: "auto", fontStyle: "italic" }}>Preliminary clinical insight — not a diagnosis</span>
+                {/* Upcoming Appointment */}
+                <div style={{ background: "#fff", border: "1px solid #e8ecf0", borderRadius: 12, overflow: "hidden" }}>
+                  <div style={{ padding: "16px 20px", borderBottom: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#0f1f3d" }}>Upcoming Appointment</span>
+                    <button
+                      onClick={() => setScreen("appt-booking")}
+                      style={{ fontSize: 12, color: "#0d7a6e", fontWeight: 600, background: "none", border: "none", cursor: "pointer" }}
+                    >
+                      View all
+                    </button>
                   </div>
-                </div>
-                <div style={{ padding: "16px 20px" }}>
-                  <p style={{ fontSize: 13, color: "#64748b", margin: "0 0 16px", lineHeight: 1.6 }}>
-                    Based on your reported symptoms and recent lab values, the following considerations may warrant clinical review at your next appointment.
-                  </p>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    {[
-                      { label: "Possible considerations", value: "HbA1c trending above target range", icon: icons.alertCircle, color: "#d97706" },
-                      { label: "Risk level", value: "Moderate — manageable with current plan", icon: icons.activity, color: "#0d7a6e" },
-                      { label: "Missing information", value: "Fasting glucose reading not recorded", icon: icons.info, color: "#1d4ed8" },
-                      { label: "Suggested next step", value: "Review medication adherence with Dr. Mehta", icon: icons.arrowRight, color: "#7c3aed" },
-                    ].map((item) => (
-                      <div key={item.label} style={{ padding: "12px 14px", background: "#f8fafc", borderRadius: 9, border: "1px solid #e8ecf0" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
-                          <Icon d={item.icon} size={13} stroke={item.color} />
-                          <span style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", letterSpacing: "0.05em" }}>{item.label.toUpperCase()}</span>
-                        </div>
-                        <div style={{ fontSize: 12, color: "#0f1f3d", lineHeight: 1.5 }}>{item.value}</div>
+                  <div style={{ padding: "20px" }}>
+                    <div style={{ display: "flex", gap: 16, alignItems: "flex-start" }}>
+                      {/* Doctor avatar */}
+                      <div
+                        onClick={() => setScreen("doctor-profile")}
+                        style={{ width: 52, height: 52, borderRadius: 12, background: "#eff6ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 20, fontWeight: 700, color: "#1d4ed8", cursor: "pointer" }}
+                        title="View Doctor Profile"
+                      >
+                        M
                       </div>
-                    ))}
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                          <span
+                            onClick={() => setScreen("doctor-profile")}
+                            style={{ fontSize: 16, fontWeight: 700, color: "#0f1f3d", cursor: "pointer" }}
+                          >
+                            Dr. Priya Mehta
+                          </span>
+                          <span style={{ fontSize: 11, fontWeight: 600, color: "#16a34a", background: "#f0fdf4", padding: "2px 10px", borderRadius: 20, border: "1px solid #bbf7d0" }}>Confirmed</span>
+                        </div>
+                        <div style={{ fontSize: 13, color: "#64748b", marginTop: 2 }}>Endocrinologist · Apollo Hospitals, Mumbai</div>
+                        <div style={{ display: "flex", gap: 20, marginTop: 12, flexWrap: "wrap" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <Icon d={icons.appointments} size={14} stroke="#94a3b8" />
+                            <span style={{ fontSize: 13, color: "#0f1f3d", fontWeight: 500 }}>Monday, Sep 15, 2026</span>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <Icon d={icons.clock} size={14} stroke="#94a3b8" />
+                            <span style={{ fontSize: 13, color: "#0f1f3d", fontWeight: 500 }}>11:30 AM</span>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                            <Icon d={icons.video} size={14} stroke="#7c3aed" />
+                            <span style={{ fontSize: 13, color: "#7c3aed", fontWeight: 500 }}>Video Consultation</span>
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setScreen("consult")}
+                        style={{ padding: "9px 18px", background: "#0d7a6e", color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", flexShrink: 0 }}
+                      >
+                        Join Consultation
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Recent Documents + Prescriptions (side by side) */}
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-                {/* Documents */}
+                {/* Health Timeline */}
                 <div style={{ background: "#fff", border: "1px solid #e8ecf0", borderRadius: 12, overflow: "hidden" }}>
-                  <div style={{ padding: "14px 16px", borderBottom: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#0f1f3d" }}>Recent Documents</span>
-                    <button style={{ fontSize: 11, color: "#0d7a6e", fontWeight: 600, background: "none", border: "none", cursor: "pointer" }}>All</button>
+                  <div style={{ padding: "16px 20px", borderBottom: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: "#0f1f3d" }}>Health Timeline</span>
+                    <button
+                      onClick={() => setScreen("timeline")}
+                      style={{ fontSize: 12, color: "#0d7a6e", fontWeight: 600, background: "none", border: "none", cursor: "pointer" }}
+                    >
+                      Full history
+                    </button>
                   </div>
-                  <div style={{ padding: "4px 14px 12px" }}>
-                    <DocRow type="Prescription" date="Aug 28, 2026" status="Active" statusColor="#16a34a" />
-                    <DocRow type="Blood Test Report" date="Aug 25, 2026" status="Reviewed" statusColor="#0d7a6e" />
-                    <DocRow type="Discharge Summary" date="Jul 12, 2026" status="Archived" statusColor="#64748b" />
-                    <DocRow type="Medical Report" date="Jun 3, 2026" status="Reviewed" statusColor="#0d7a6e" />
+                  <div style={{ padding: "20px" }}>
+                    <TimelineItem type="consultation" title="Endocrinology Consultation" desc="Dr. Priya Mehta · Apollo Hospitals, Mumbai" date="Aug 28, 2026" />
+                    <TimelineItem type="lab" title="HbA1c + Lipid Profile" desc="Thyrocare Labs · 6 results" date="Aug 25, 2026" />
+                    <TimelineItem type="prescription" title="Prescription Updated" desc="Metformin dose adjusted — Dr. Mehta" date="Aug 28, 2026" />
+                    <TimelineItem type="document" title="Discharge Summary Uploaded" desc="Nanavati Hospital · Appendectomy" date="Jul 12, 2026" />
+                    <TimelineItem type="followup" title="Follow-up Scheduled" desc="Dr. Priya Mehta · 3 months review" date="Jun 15, 2026" last />
                   </div>
                 </div>
 
-                {/* Prescriptions */}
-                <div style={{ background: "#fff", border: "1px solid #e8ecf0", borderRadius: 12, overflow: "hidden" }}>
-                  <div style={{ padding: "14px 16px", borderBottom: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#0f1f3d" }}>Recent Prescriptions</span>
-                    <button style={{ fontSize: 11, color: "#0d7a6e", fontWeight: 600, background: "none", border: "none", cursor: "pointer" }}>All</button>
+                {/* Clinical Insight */}
+                <div style={{ background: "#fff", border: "1px solid #e8ecf0", borderLeft: "3px solid #d97706", borderRadius: "0 12px 12px 0", overflow: "hidden" }}>
+                  <div style={{ padding: "16px 20px", borderBottom: "1px solid #f1f5f9" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <Icon d={icons.info} size={16} stroke="#d97706" />
+                      <span style={{ fontSize: 14, fontWeight: 700, color: "#0f1f3d" }}>Clinical Insight</span>
+                      <span style={{ fontSize: 10, color: "#94a3b8", marginLeft: "auto", fontStyle: "italic" }}>Preliminary clinical insight — not a diagnosis</span>
+                    </div>
                   </div>
-                  <div style={{ padding: "4px 14px 12px" }}>
-                    <RxRow name="Metformin" dosage="500mg · OD" doctor="Dr. Priya Mehta" date="Aug 28" />
-                    <RxRow name="Atorvastatin" dosage="10mg · HS" doctor="Dr. Priya Mehta" date="Aug 28" />
-                    <RxRow name="Aspirin" dosage="75mg · OD" doctor="Dr. Priya Mehta" date="Aug 28" />
-                    <RxRow name="Vitamin D3" dosage="60K IU · Weekly" doctor="Dr. Priya Mehta" date="Jun 15" />
+                  <div style={{ padding: "16px 20px" }}>
+                    <p style={{ fontSize: 13, color: "#64748b", margin: "0 0 16px", lineHeight: 1.6 }}>
+                      Based on your reported symptoms and recent lab values, the following considerations may warrant clinical review at your next appointment.
+                    </p>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                      {[
+                        { label: "Possible considerations", value: "HbA1c trending above target range", icon: icons.alertCircle, color: "#d97706" },
+                        { label: "Risk level", value: "Moderate — manageable with current plan", icon: icons.activity, color: "#0d7a6e" },
+                        { label: "Missing information", value: "Fasting glucose reading not recorded", icon: icons.info, color: "#1d4ed8" },
+                        { label: "Suggested next step", value: "Review medication adherence with Dr. Mehta", icon: icons.arrowRight, color: "#7c3aed" },
+                      ].map((item) => (
+                        <div key={item.label} style={{ padding: "12px 14px", background: "#f8fafc", borderRadius: 9, border: "1px solid #e8ecf0" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
+                            <Icon d={item.icon} size={13} stroke={item.color} />
+                            <span style={{ fontSize: 10, fontWeight: 700, color: "#94a3b8", letterSpacing: "0.05em" }}>{item.label.toUpperCase()}</span>
+                          </div>
+                          <div style={{ fontSize: 12, color: "#0f1f3d", lineHeight: 1.5 }}>{item.value}</div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
+
+                {/* Recent Documents + Prescriptions (side by side) */}
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                  {/* Documents */}
+                  <div style={{ background: "#fff", border: "1px solid #e8ecf0", borderRadius: 12, overflow: "hidden" }}>
+                    <div style={{ padding: "14px 16px", borderBottom: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: "#0f1f3d" }}>Recent Documents</span>
+                      <button
+                        onClick={() => setScreen("record")}
+                        style={{ fontSize: 11, color: "#0d7a6e", fontWeight: 600, background: "none", border: "none", cursor: "pointer" }}
+                      >
+                        All
+                      </button>
+                    </div>
+                    <div style={{ padding: "4px 14px 12px" }}>
+                      <DocRow type="Prescription" date="Aug 28, 2026" status="Active" statusColor="#16a34a" />
+                      <DocRow type="Blood Test Report" date="Aug 25, 2026" status="Reviewed" statusColor="#0d7a6e" />
+                      <DocRow type="Discharge Summary" date="Jul 12, 2026" status="Archived" statusColor="#64748b" />
+                      <DocRow type="Medical Report" date="Jun 3, 2026" status="Reviewed" statusColor="#0d7a6e" />
+                    </div>
+                  </div>
+
+                  {/* Prescriptions */}
+                  <div style={{ background: "#fff", border: "1px solid #e8ecf0", borderRadius: 12, overflow: "hidden" }}>
+                    <div style={{ padding: "14px 16px", borderBottom: "1px solid #f1f5f9", display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: "#0f1f3d" }}>Recent Prescriptions</span>
+                      <button
+                        onClick={() => setScreen("prescription")}
+                        style={{ fontSize: 11, color: "#0d7a6e", fontWeight: 600, background: "none", border: "none", cursor: "pointer" }}
+                      >
+                        All
+                      </button>
+                    </div>
+                    <div style={{ padding: "4px 14px 12px" }}>
+                      <RxRow name="Metformin" dosage="500mg · OD" doctor="Dr. Priya Mehta" date="Aug 28" />
+                      <RxRow name="Atorvastatin" dosage="10mg · HS" doctor="Dr. Priya Mehta" date="Aug 28" />
+                      <RxRow name="Aspirin" dosage="75mg · OD" doctor="Dr. Priya Mehta" date="Aug 28" />
+                      <RxRow name="Vitamin D3" dosage="60K IU · Weekly" doctor="Dr. Priya Mehta" date="Jun 15" />
+                    </div>
+                  </div>
+                </div>
+
               </div>
 
-            </div>
+              {/* ── RIGHT COLUMN ── */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
 
-            {/* ── RIGHT COLUMN ── */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                {/* ABHA */}
+                <div style={{ background: "#fff", border: "1px solid #e8ecf0", borderRadius: 12, padding: "14px 16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
+                    <Icon d={icons.shield} size={15} stroke="#0d7a6e" />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: "#0f1f3d" }}>ABHA Health Connection</span>
+                  </div>
+                  <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 10 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a" }} />
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "#16a34a" }}>Connected</span>
+                    <span style={{ fontSize: 11, color: "#94a3b8", marginLeft: 4 }}>ID: 12-3456-7890-0001</span>
+                  </div>
+                  <div style={{ fontSize: 11, color: "#64748b", marginBottom: 8, lineHeight: 1.5 }}>
+                    Health records are accessed through your explicit consent. No records are stored centrally without your permission.
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 6 }}>
+                    <span style={{ color: "#94a3b8" }}>Consent status</span>
+                    <span style={{ color: "#16a34a", fontWeight: 600 }}>Active (3 providers)</span>
+                  </div>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 12 }}>
+                    <span style={{ color: "#94a3b8" }}>Last synced</span>
+                    <span style={{ color: "#0f1f3d", fontWeight: 500 }}>Today, 7:12 AM</span>
+                  </div>
+                  <button
+                    onClick={() => setScreen("consent")}
+                    style={{ width: "100%", padding: "8px", background: "#f0fdf9", color: "#0d7a6e", border: "1px solid #b2e8e0", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer" }}
+                  >
+                    Manage Consent
+                  </button>
+                </div>
 
-              {/* ABHA */}
-              <div style={{ background: "#fff", border: "1px solid #e8ecf0", borderRadius: 12, padding: "14px 16px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
-                  <Icon d={icons.shield} size={15} stroke="#0d7a6e" />
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "#0f1f3d" }}>ABHA Health Connection</span>
+                {/* Health Snapshot */}
+                <div style={{ background: "#fff", border: "1px solid #e8ecf0", borderRadius: 12, padding: "14px 16px" }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#0f1f3d", marginBottom: 16 }}>Health Snapshot</div>
+                  <HealthSnapshot />
                 </div>
-                <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 10 }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#16a34a" }} />
-                  <span style={{ fontSize: 12, fontWeight: 600, color: "#16a34a" }}>Connected</span>
-                  <span style={{ fontSize: 11, color: "#94a3b8", marginLeft: 4 }}>ID: 12-3456-7890-0001</span>
-                </div>
-                <div style={{ fontSize: 11, color: "#64748b", marginBottom: 8, lineHeight: 1.5 }}>
-                  Health records are accessed through your explicit consent. No records are stored centrally without your permission.
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 6 }}>
-                  <span style={{ color: "#94a3b8" }}>Consent status</span>
-                  <span style={{ color: "#16a34a", fontWeight: 600 }}>Active (3 providers)</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, marginBottom: 12 }}>
-                  <span style={{ color: "#94a3b8" }}>Last synced</span>
-                  <span style={{ color: "#0f1f3d", fontWeight: 500 }}>Today, 7:12 AM</span>
-                </div>
-                <button style={{ width: "100%", padding: "8px", background: "#f0fdf9", color: "#0d7a6e", border: "1px solid #b2e8e0", borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
-                  Manage Consent
-                </button>
+
               </div>
-
-              {/* Health Snapshot */}
-              <div style={{ background: "#fff", border: "1px solid #e8ecf0", borderRadius: 12, padding: "14px 16px" }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "#0f1f3d", marginBottom: 16 }}>Health Snapshot</div>
-                <HealthSnapshot />
-              </div>
-
             </div>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh", overflow: "hidden", background: "#f5f7fa" }}>
+      <UniversalNavBar
+        role={role}
+        screen={screen}
+        onSelectRole={handleSelectRole}
+        onSelectScreen={(s) => setScreen(s)}
+        onLogout={() => setScreen("login")}
+      />
+      <div style={{ flex: 1, minHeight: 0, overflow: "hidden", position: "relative" }}>
+        {renderCurrentScreen()}
       </div>
     </div>
   );

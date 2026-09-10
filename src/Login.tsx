@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { UserRole, DEMO_ROLES } from "./types";
 
 // ─── Icon primitive — identical to Dashboard & Register ───────────────────────
 const Icon = ({
@@ -26,6 +27,12 @@ const ic = {
   activity:    "M22 12h-4l-3 9L9 3l-3 9H2",
   info:        "M12 2a10 10 0 100 20A10 10 0 0012 2zm0 9v4m0-7h.01",
   checkCircle: "M22 11.08V12a10 10 0 11-5.93-9.14 M22 4L12 14.01l-3-3",
+  user:        "M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2 M12 11a4 4 0 100-8 4 4 0 000 8z",
+  building:    "M3 21h18M3 7l9-4 9 4M4 11h16v10H4z M9 21v-6h6v6",
+  stethoscope: "M4.8 2.3A.3.3 0 105 2H4a2 2 0 00-2 2v5a6 6 0 006 6 6 6 0 006-6V4a2 2 0 00-2-2h-1a.2.2 0 10.3.3M8 15v1a6 6 0 006 6 6 6 0 006-6v-4",
+  pill:        "M10.5 20H4a2 2 0 01-2-2V6a2 2 0 012-2h9.5m4.5 14a2 2 0 002-2V8.5L14 3H9.5m5 0v5.5H20M7 13h4m-2-2v4",
+  flask:       "M10 2v7.31M14 9.3V1.99M8.5 2h7M14 9.3a5 5 0 11-4 0",
+  sparkles:    "M12 3v3m0 12v3M3 12h3m12 0h3M5.636 5.636l2.122 2.122m8.485 8.485l2.122 2.122M5.636 18.364l2.122-2.122m8.485-8.485l2.122-2.122",
 };
 
 // ─── Design tokens — exact match with Dashboard & Register ───────────────────
@@ -275,6 +282,181 @@ function BrandPanel() {
   );
 }
 
+// ─── Demo Role Selector ──────────────────────────────────────────────────────
+function DemoRoleSelector({
+  selectedRole,
+  onSelectRole,
+  onQuickLogin,
+}: {
+  selectedRole: UserRole;
+  onSelectRole: (r: UserRole) => void;
+  onQuickLogin: (r: UserRole) => void;
+}) {
+  const roleIcons: Record<UserRole, string> = {
+    patient: ic.user,
+    doctor: ic.stethoscope,
+    hospital: ic.building,
+    pharmacy: ic.pill,
+    lab: ic.flask,
+    admin: ic.shield,
+  };
+
+  const activeInfo = DEMO_ROLES[selectedRole];
+
+  return (
+    <div
+      style={{
+        background: T.white,
+        border: `1.5px solid ${T.primaryBorder}`,
+        borderRadius: 12,
+        padding: "15px 16px",
+        marginBottom: 20,
+        boxShadow: "0 2px 8px rgba(13,122,110,0.06)",
+      }}
+    >
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+          <div style={{ width: 22, height: 22, borderRadius: 6, background: T.primaryLight, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Icon d={ic.sparkles} size={13} stroke={T.primary} />
+          </div>
+          <span style={{ fontSize: 13, fontWeight: 700, color: T.navy }}>Demo Role Selector</span>
+        </div>
+        <span
+          style={{
+            fontSize: 10,
+            fontWeight: 700,
+            color: T.primary,
+            background: T.primaryLight,
+            border: `1px solid ${T.primaryBorder}`,
+            padding: "2px 8px",
+            borderRadius: 12,
+            letterSpacing: "0.04em",
+          }}
+        >
+          DEVELOPMENT & DEMO
+        </span>
+      </div>
+
+      <p style={{ margin: "0 0 10px", fontSize: 11, color: T.gray, lineHeight: 1.4 }}>
+        Select a role to test specific dashboards, permissions, and clinical flows:
+      </p>
+
+      {/* Grid of 6 roles */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 6,
+          marginBottom: 11,
+        }}
+      >
+        {(Object.keys(DEMO_ROLES) as UserRole[]).map((r) => {
+          const item = DEMO_ROLES[r];
+          const isSelected = selectedRole === r;
+          return (
+            <button
+              key={r}
+              type="button"
+              onClick={() => onSelectRole(r)}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 5,
+                padding: "8px 4px",
+                borderRadius: 8,
+                border: isSelected ? `1.5px solid ${T.primary}` : `1px solid ${T.border}`,
+                background: isSelected ? T.primaryLight : T.muted,
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+                fontFamily: "Inter, system-ui, sans-serif",
+              }}
+            >
+              <div
+                style={{
+                  width: 26,
+                  height: 26,
+                  borderRadius: 6,
+                  background: isSelected ? T.primary : T.white,
+                  border: isSelected ? "none" : `1px solid ${T.border}`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Icon d={roleIcons[r]} size={13} stroke={isSelected ? "#fff" : T.navy} />
+              </div>
+              <span
+                style={{
+                  fontSize: 11,
+                  fontWeight: isSelected ? 700 : 500,
+                  color: isSelected ? T.primaryDark : T.navy,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {item.title}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Active Role Card & Quick Launch */}
+      <div
+        style={{
+          background: T.muted,
+          border: `1px solid ${T.border}`,
+          borderRadius: 8,
+          padding: "9px 12px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 10,
+        }}
+      >
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: T.navy, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              {activeInfo.name}
+            </span>
+            <span style={{ fontSize: 9, fontWeight: 700, color: T.primary, background: T.primaryLight, padding: "1px 6px", borderRadius: 4, whiteSpace: "nowrap" }}>
+              {activeInfo.badge}
+            </span>
+          </div>
+          <div style={{ fontSize: 10, color: T.grayLight, marginTop: 1, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            {activeInfo.subtitle}
+          </div>
+        </div>
+        <button
+          type="button"
+          onClick={() => onQuickLogin(selectedRole)}
+          style={{
+            padding: "6px 12px",
+            background: T.primary,
+            border: "none",
+            borderRadius: 7,
+            color: "#fff",
+            fontSize: 11,
+            fontWeight: 700,
+            cursor: "pointer",
+            fontFamily: "Inter, system-ui, sans-serif",
+            whiteSpace: "nowrap",
+            display: "flex",
+            alignItems: "center",
+            gap: 4,
+            flexShrink: 0,
+            boxShadow: "0 1px 3px rgba(13,122,110,0.25)",
+          }}
+        >
+          Quick Demo <Icon d={ic.arrowRight} size={11} stroke="#fff" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Login form panel ─────────────────────────────────────────────────────────
 type LoginTab = "mobile" | "abha";
 type LoginStage = "entry" | "otp" | "abha-form";
@@ -282,15 +464,18 @@ type LoginStage = "entry" | "otp" | "abha-form";
 export default function Login({
   onLogin,
   onRegister,
+  initialRole = "patient",
 }: {
-  onLogin: () => void;
+  onLogin: (role?: UserRole) => void;
   onRegister: () => void;
+  initialRole?: UserRole;
 }) {
+  const [selectedRole, setSelectedRole] = useState<UserRole>(initialRole);
   const [tab, setTab] = useState<LoginTab>("mobile");
   const [stage, setStage] = useState<LoginStage>("entry");
 
   // Mobile flow
-  const [mobile, setMobile] = useState("");
+  const [mobile, setMobile] = useState(DEMO_ROLES[initialRole].defaultMobile);
   const [mobileFocused, setMobileFocused] = useState(false);
   const [mobileError, setMobileError] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -298,12 +483,25 @@ export default function Login({
   const { seconds: resendSec, start: startResend } = useCountdown();
 
   // ABHA flow
-  const [abhaValue, setAbhaValue] = useState("");
+  const [abhaValue, setAbhaValue] = useState(DEMO_ROLES[initialRole].defaultAbha);
   const [abhaFocused, setAbhaFocused] = useState(false);
   const [abhaError, setAbhaError] = useState("");
 
   const mobileValid = validateMobile(mobile);
   const otpFilled = otp.join("").length === 6;
+
+  function handleSelectRole(r: UserRole) {
+    setSelectedRole(r);
+    setMobile(DEMO_ROLES[r].defaultMobile);
+    setAbhaValue(DEMO_ROLES[r].defaultAbha);
+    setMobileError("");
+    setAbhaError("");
+    setOtpError("");
+  }
+
+  function handleQuickLogin(r: UserRole) {
+    onLogin(r);
+  }
 
   // ── Mobile: step 1 → send OTP
   function handleContinue() {
@@ -318,7 +516,7 @@ export default function Login({
   // ── OTP: verify
   function handleVerify() {
     if (!otpFilled) { setOtpError("Please enter the complete 6-digit OTP."); return; }
-    onLogin();
+    onLogin(selectedRole);
   }
 
   // ── Resend
@@ -338,7 +536,7 @@ export default function Login({
       return;
     }
     setAbhaError("");
-    onLogin();
+    onLogin(selectedRole);
   }
 
   // ── Tab switch reset
@@ -370,10 +568,17 @@ export default function Login({
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
-        padding: "48px 40px",
+        padding: "40px 32px",
         overflowY: "auto",
       }}>
-        <div style={{ width: "100%", maxWidth: 400 }}>
+        <div style={{ width: "100%", maxWidth: 420 }}>
+
+          {/* Demo Role Selector for Development and Testing */}
+          <DemoRoleSelector
+            selectedRole={selectedRole}
+            onSelectRole={handleSelectRole}
+            onQuickLogin={handleQuickLogin}
+          />
 
           {/* ── STAGE: entry (mobile tab) ── */}
           {stage === "entry" && tab === "mobile" && (
@@ -645,6 +850,26 @@ function OtpForm({
       </label>
 
       <OtpBoxes value={otp} onChange={setOtp} />
+
+      <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+        <button
+          type="button"
+          onClick={() => setOtp(["1", "2", "3", "4", "5", "6"])}
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: T.primary,
+            fontSize: 11,
+            fontWeight: 600,
+            padding: "2px 0",
+            fontFamily: "Inter, system-ui, sans-serif",
+            textDecoration: "underline",
+          }}
+        >
+          Auto-fill Demo OTP (123456)
+        </button>
+      </div>
 
       {otpError && (
         <p style={{ fontSize: 12, color: T.danger, marginTop: 10, display: "flex", gap: 4, alignItems: "center" }}>

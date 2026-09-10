@@ -1,0 +1,8 @@
+{
+  "name": "MediKiosk",
+  "description": "Comprehensive digital healthcare kiosk and clinical management platform for patients, doctors, hospitals, and pharmacies.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
