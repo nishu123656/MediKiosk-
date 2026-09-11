@@ -276,7 +276,7 @@ export default function LabDashboard({
   const [processed, setProcessed]     = useState<string[]>([]);
 
   return (
-    <div style={{ display: "flex", height: hideSidebar ? "100%" : "100vh", background: T.bg, fontFamily: "Inter, system-ui, sans-serif", color: T.navy, overflow: "hidden", width: "100%" }}>
+    <div style={{ display: "flex", minHeight: "100%", background: T.bg, fontFamily: "Inter, system-ui, sans-serif", color: T.navy, width: "100%" }}>
 
       {/* ═══ SIDEBAR ═══ */}
       {!hideSidebar && (
@@ -346,7 +346,7 @@ export default function LabDashboard({
       )}
 
       {/* ═══ MAIN ═══ */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
 
         {/* Header */}
         <header style={{ height: 56, background: T.white, borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", padding: "0 22px", gap: 14, flexShrink: 0, position: "sticky", top: 0, zIndex: 10 }}>
@@ -381,7 +381,7 @@ export default function LabDashboard({
         </header>
 
         {/* Body */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "18px 22px 48px" }}>
+        <div style={{ flex: 1, padding: "18px 22px 48px" }}>
 
           {/* ── STATS ── */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 10, marginBottom: 18 }}>

@@ -744,14 +744,15 @@ export default function ConsultationRoom({ onEnd }: { onEnd: () => void }) {
 
   return (
     <div style={{
-      display: "flex", flexDirection: "column", height: "100vh",
-      background: T.bg, fontFamily: "Inter, system-ui, sans-serif", color: T.navy, overflow: "hidden",
+      display: "flex", flexDirection: "column", minHeight: "100%",
+      background: T.bg, fontFamily: "Inter, system-ui, sans-serif", color: T.navy,
     }}>
 
       {/* ── Top bar ── */}
       <header style={{
         height: 56, background: T.white, borderBottom: `1px solid ${T.border}`,
         display: "flex", alignItems: "center", padding: "0 20px", gap: 14, flexShrink: 0, zIndex: 20,
+        position: "sticky", top: 0,
       }}>
         {/* Logo */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
@@ -855,7 +856,7 @@ export default function ConsultationRoom({ onEnd }: { onEnd: () => void }) {
         </div>
       ) : (
         /* ─ Desktop three-column layout ─ */
-        <div style={{ flex: 1, display: "flex", gap: 16, padding: "16px 20px 16px", minHeight: 0, overflow: "hidden" }}>
+        <div style={{ flex: 1, display: "flex", gap: 16, padding: "16px 20px 16px", minHeight: 0 }}>
 
           {/* Left: video */}
           <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, gap: 12 }}>
@@ -879,6 +880,7 @@ export default function ConsultationRoom({ onEnd }: { onEnd: () => void }) {
       <div style={{
         flexShrink: 0, background: T.white, borderTop: `1px solid ${T.border}`,
         padding: "10px 20px", display: "flex", alignItems: "center", gap: 10, zIndex: 10,
+        position: "sticky", bottom: 0,
       }}>
         <span style={{ fontSize: 12, color: T.grayLight }}>
           Consultation with <strong style={{ color: T.navy }}>Rahul Sharma</strong> · MK-00421

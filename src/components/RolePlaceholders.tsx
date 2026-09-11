@@ -64,6 +64,9 @@ export default function RolePlaceholders({
         justifyContent: "space-between",
         gap: 16,
         flexShrink: 0,
+        position: "sticky",
+        top: 0,
+        zIndex: 10,
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -120,7 +123,7 @@ export default function RolePlaceholders({
     );
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%", background: T.bg, overflow: "hidden" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100%", background: T.bg }}>
         <ScreenHeader
           title="Find Healthcare & Diagnostics"
           subtitle="Search certified ABDM doctors, hospitals, pharmacies and accredited diagnostic labs"
@@ -136,7 +139,7 @@ export default function RolePlaceholders({
           }
         />
 
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+        <div style={{ flex: 1, padding: "20px 24px" }}>
           <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", flexDirection: "column", gap: 16 }}>
             {/* Search bar */}
             <div style={{ display: "flex", gap: 10 }}>
@@ -206,7 +209,7 @@ export default function RolePlaceholders({
     ];
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%", background: T.bg, overflow: "hidden" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100%", background: T.bg }}>
         <ScreenHeader
           title="Medical Documents & Health Locker"
           subtitle="All ABDM-linked health records, lab summaries and diagnostic uploads"
@@ -234,7 +237,7 @@ export default function RolePlaceholders({
           </div>
         )}
 
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+        <div style={{ flex: 1, padding: "20px 24px" }}>
           <div style={{ maxWidth: 960, margin: "0 auto", display: "flex", flexDirection: "column", gap: 16 }}>
             {/* Locker Stats */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
@@ -297,7 +300,7 @@ export default function RolePlaceholders({
   // 3. AI CLINICAL INTELLIGENCE
   if (featureId === "ai-intelligence") {
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%", background: T.bg, overflow: "hidden" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100%", background: T.bg }}>
         <ScreenHeader
           title="AI Clinical Intelligence & Decision Support"
           subtitle="ABDM-compliant diagnostic guidance, drug interaction alerts and automated clinical triage"
@@ -319,7 +322,7 @@ export default function RolePlaceholders({
           }
         />
 
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+        <div style={{ flex: 1, padding: "20px 24px" }}>
           <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", flexDirection: "column", gap: 16 }}>
             {/* Active Clinical Warning Banner */}
             <div style={{ background: T.dangerLight, border: `1px solid ${T.dangerBorder}`, borderRadius: 10, padding: "14px 18px" }}>
@@ -402,7 +405,7 @@ export default function RolePlaceholders({
     ];
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%", background: T.bg, overflow: "hidden" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100%", background: T.bg }}>
         <ScreenHeader
           title="Hospital Departments & Specialized Wards"
           subtitle="Manage medical units, on-duty physicians, bed allocations and emergency triage"
@@ -418,7 +421,7 @@ export default function RolePlaceholders({
           }
         />
 
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+        <div style={{ flex: 1, padding: "20px 24px" }}>
           <div style={{ maxWidth: 1000, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(460px, 1fr))", gap: 14 }}>
             {depts.map((d, i) => (
               <div key={i} style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: 10, padding: "16px 18px" }}>
@@ -479,7 +482,7 @@ export default function RolePlaceholders({
     ];
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%", background: T.bg, overflow: "hidden" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100%", background: T.bg }}>
         <ScreenHeader
           title="Pharmacy Inventory & Stock Control"
           subtitle="Real-time pharmaceutical batch tracking, expiry monitoring and automatic reorder alerts"
@@ -507,7 +510,7 @@ export default function RolePlaceholders({
           </div>
         )}
 
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+        <div style={{ flex: 1, padding: "20px 24px" }}>
           <div style={{ maxWidth: 1000, margin: "0 auto", background: T.white, border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden" }}>
             <div style={{ padding: "14px 18px", borderBottom: `1px solid ${T.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: T.navy }}>Current Medicine Batches</span>
@@ -549,7 +552,7 @@ export default function RolePlaceholders({
     ];
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%", background: T.bg, overflow: "hidden" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100%", background: T.bg }}>
         <ScreenHeader
           title="Specimen & Sample Barcode Management"
           subtitle="Sample barcode verification, analyzer routing and cold chain temperature logging"
@@ -565,7 +568,7 @@ export default function RolePlaceholders({
           }
         />
 
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+        <div style={{ flex: 1, padding: "20px 24px" }}>
           <div style={{ maxWidth: 1000, margin: "0 auto", background: T.white, border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden" }}>
             <div style={{ padding: "14px 18px", borderBottom: `1px solid ${T.border}`, fontWeight: 700, fontSize: 13, color: T.navy }}>
               Today's Specimen Queue
@@ -606,7 +609,7 @@ export default function RolePlaceholders({
     ];
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%", background: T.bg, overflow: "hidden" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100%", background: T.bg }}>
         <ScreenHeader
           title="Billing, Invoices & Payment Gateway"
           subtitle="Instant UPI, cashless ABDM health insurance claims and patient invoices"
@@ -622,7 +625,7 @@ export default function RolePlaceholders({
           }
         />
 
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+        <div style={{ flex: 1, padding: "20px 24px" }}>
           <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
               {[
@@ -665,7 +668,7 @@ export default function RolePlaceholders({
   // 8. REPORTS & ANALYTICS
   if (featureId === "reports" || featureId === "analytics") {
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%", background: T.bg, overflow: "hidden" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100%", background: T.bg }}>
         <ScreenHeader
           title={featureId === "analytics" ? "Diagnostic Analytics & Laboratory QA" : "Clinical & Operational Performance Reports"}
           subtitle="Aggregated healthcare metrics, turnaround times and national compliance data"
@@ -681,7 +684,7 @@ export default function RolePlaceholders({
           }
         />
 
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+        <div style={{ flex: 1, padding: "20px 24px" }}>
           <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
               <div style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: 10, padding: "16px" }}>
@@ -742,7 +745,7 @@ export default function RolePlaceholders({
     ];
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%", background: T.bg, overflow: "hidden" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100%", background: T.bg }}>
         <ScreenHeader
           title="ABDM Security, Access & Audit Logs"
           subtitle="Immutable audit trail of all patient consent grants, clinical record views and system transactions"
@@ -758,7 +761,7 @@ export default function RolePlaceholders({
           }
         />
 
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+        <div style={{ flex: 1, padding: "20px 24px" }}>
           <div style={{ maxWidth: 1000, margin: "0 auto", background: T.white, border: `1px solid ${T.border}`, borderRadius: 10, overflow: "hidden" }}>
             <div style={{ padding: "14px 18px", borderBottom: `1px solid ${T.border}`, fontWeight: 700, fontSize: 13, color: T.navy }}>
               Real-time Platform Audit Trail
@@ -802,7 +805,7 @@ export default function RolePlaceholders({
     ];
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%", background: T.bg, overflow: "hidden" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100%", background: T.bg }}>
         <ScreenHeader
           title="MediKiosk Platform Health & Infrastructure"
           subtitle="Live telemetry for ABDM gateway, microservices and national database clusters"
@@ -816,7 +819,7 @@ export default function RolePlaceholders({
           }
         />
 
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+        <div style={{ flex: 1, padding: "20px 24px" }}>
           <div style={{ maxWidth: 1000, margin: "0 auto", display: "flex", flexDirection: "column", gap: 16 }}>
             {/* Overall status */}
             <div style={{ background: T.successLight, border: `1px solid ${T.successBorder}`, borderRadius: 10, padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -866,7 +869,7 @@ export default function RolePlaceholders({
     ];
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%", background: T.bg, overflow: "hidden" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100%", background: T.bg }}>
         <ScreenHeader
           title="Notification Center"
           subtitle={`Important medical alerts and updates for ${roleInfo.name}`}
@@ -886,7 +889,7 @@ export default function RolePlaceholders({
           </div>
         )}
 
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+        <div style={{ flex: 1, padding: "20px 24px" }}>
           <div style={{ maxWidth: 840, margin: "0 auto", display: "flex", flexDirection: "column", gap: 10 }}>
             {roleNotifs.map((n) => (
               <div key={n.id} style={{ background: T.white, border: `1px solid ${n.unread ? T.primaryBorder : T.border}`, borderRadius: 9, padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", boxShadow: n.unread ? "0 2px 8px rgba(13, 122, 110, 0.08)" : "none" }}>
@@ -920,7 +923,7 @@ export default function RolePlaceholders({
   // 12. SETTINGS
   if (featureId === "settings") {
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%", background: T.bg, overflow: "hidden" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100%", background: T.bg }}>
         <ScreenHeader
           title="Account, Security & ABDM Settings"
           subtitle={`Manage settings and preferences for ${roleInfo.name} (${roleInfo.title})`}
@@ -940,7 +943,7 @@ export default function RolePlaceholders({
           </div>
         )}
 
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px" }}>
+        <div style={{ flex: 1, padding: "20px 24px" }}>
           <div style={{ maxWidth: 840, margin: "0 auto", display: "flex", flexDirection: "column", gap: 16 }}>
             {/* Identity Card */}
             <div style={{ background: T.white, border: `1px solid ${T.border}`, borderRadius: 10, padding: "18px" }}>
@@ -1002,7 +1005,7 @@ export default function RolePlaceholders({
 
   // Default fallback placeholder
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: T.bg, overflow: "hidden" }}>
+    <div style={{ display: "flex", flexDirection: "column", minHeight: "100%", background: T.bg }}>
       <ScreenHeader
         title={featureId.replace("-", " ").toUpperCase()}
         subtitle={`MediKiosk Healthcare Module · Active Role: ${roleInfo.title}`}

@@ -464,6 +464,9 @@ export default function Consent({
         display: "flex", alignItems: "center",
         padding: "0 32px",
         flexShrink: 0,
+        position: "sticky",
+        top: 0,
+        zIndex: 20,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{
@@ -495,7 +498,7 @@ export default function Consent({
 
       {/* ── Scrollable body ── */}
       <div style={{
-        flex: 1, overflowY: "auto",
+        flex: 1,
         display: "flex", justifyContent: "center",
         padding: "44px 24px 80px",
       }}>

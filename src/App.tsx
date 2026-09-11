@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { UserRole, ScreenType, DEMO_ROLES } from "./types";
 import RoleSidebar from "./components/RoleSidebar";
 import RolePlaceholders from "./components/RolePlaceholders";
@@ -495,6 +495,15 @@ function MediKioskApp() {
 
   const role: UserRole = userRole || "patient";
 
+  const mainContentRef = useRef<HTMLElement>(null);
+
+  // Automatically reset scroll position to top whenever screen changes
+  useEffect(() => {
+    if (mainContentRef.current) {
+      mainContentRef.current.scrollTo({ top: 0, left: 0 });
+    }
+  }, [screen]);
+
   // Sync with URL Hash for real client-side routing & deep-links
   useEffect(() => {
     function parseHash() {
@@ -969,7 +978,7 @@ function MediKioskApp() {
     }
 
     if (screen === "doctor-profile") {
-      return <DoctorProfile onBack={() => navigateTo(role === "doctor" ? "doctor" : "dashboard")} />;
+      return <DoctorProfile hideSidebar={true} onBack={() => navigateTo(role === "doctor" ? "doctor" : "dashboard")} />;
     }
 
     if (screen === "appt-booking") {
@@ -1008,7 +1017,7 @@ function MediKioskApp() {
     const abhaDisplayId = currentUser?.abhaId || "12-3456-7890-0001";
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", minWidth: 0, overflow: "hidden" }}>
+      <div style={{ display: "flex", flexDirection: "column", minHeight: "100%", width: "100%", minWidth: 0 }}>
         <Header
           onRegister={() => navigateTo("register")}
           onApptBooking={() => navigateTo("appt-booking")}
@@ -1017,7 +1026,7 @@ function MediKioskApp() {
         />
 
         {/* Scrollable content */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "28px 28px 40px" }}>
+        <div style={{ flex: 1, padding: "28px 28px 40px" }}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 284px", gap: 24, maxWidth: 1280 }}>
 
               {/* ── LEFT COLUMN ── */}
@@ -1287,10 +1296,24 @@ function MediKioskApp() {
         onLogout={handleLogout}
       />
 
-      {/* Screen Viewport */}
-      <div style={{ flex: 1, minWidth: 0, height: "100%", overflow: "hidden", position: "relative", display: "flex", flexDirection: "column" }}>
+      {/* Screen Viewport / MainContent */}
+      <main
+        ref={mainContentRef}
+        id="main-content-viewport"
+        style={{
+          flex: 1,
+          minWidth: 0,
+          minHeight: 0,
+          height: "100%",
+          overflowY: "auto",
+          overflowX: "hidden",
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
         {renderGuardedViewport()}
-      </div>
+      </main>
     </div>
   );
 }

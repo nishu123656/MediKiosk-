@@ -881,8 +881,8 @@ export default function DoctorDashboard({
 
   return (
     <div style={{
-      display: "flex", height: hideSidebar ? "100%" : "100vh", background: T.bg,
-      fontFamily: "Inter, system-ui, sans-serif", color: T.navy, overflow: "hidden", width: "100%",
+      display: "flex", minHeight: "100%", background: T.bg,
+      fontFamily: "Inter, system-ui, sans-serif", color: T.navy, width: "100%",
     }}>
       {!hideSidebar && (
         <Sidebar
@@ -910,10 +910,10 @@ export default function DoctorDashboard({
       )}
 
       {/* Main column */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
         <Header onMenuClick={() => setSidebarOpen(true)} />
 
-        <div style={{ flex: 1, overflowY: "auto", padding: narrow ? "16px 16px 40px" : "28px 28px 48px" }}>
+        <div style={{ flex: 1, padding: narrow ? "16px 16px 40px" : "28px 28px 48px" }}>
 
           {/* Greeting */}
           <div style={{ marginBottom: 24 }}>

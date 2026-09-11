@@ -174,6 +174,9 @@ function TopBar() {
       padding: "0 24px",
       flexShrink: 0,
       gap: 16,
+      position: "sticky",
+      top: 0,
+      zIndex: 20,
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <div style={{ width: 30, height: 30, background: T.primary, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -478,7 +481,7 @@ export default function ClinicalIntake({
 
   return (
     <div style={{
-      minHeight: "100vh",
+      minHeight: "100%",
       background: T.bg,
       fontFamily: "Inter, system-ui, sans-serif",
       display: "flex",
@@ -490,12 +493,10 @@ export default function ClinicalIntake({
       <div style={{
         flex: 1, display: "grid",
         gridTemplateColumns: "minmax(0,1fr) 300px",
-        overflow: "hidden",
-        maxHeight: "calc(100vh - 60px)",
       }}>
 
         {/* ── LEFT: Question area ── */}
-        <div style={{ overflowY: "auto", padding: "36px 40px 60px" }}>
+        <div style={{ padding: "36px 40px 60px" }}>
           <div style={{ maxWidth: 560 }}>
 
             <IntakeProgress current={currentQ} total={TOTAL} />
@@ -715,7 +716,6 @@ export default function ClinicalIntake({
 
         {/* ── RIGHT: Collected panel ── */}
         <div style={{
-          overflowY: "auto",
           borderLeft: `1px solid ${T.border}`,
           background: T.bg,
           padding: "24px 16px 40px",

@@ -304,7 +304,7 @@ export default function AdminDashboard({
   const [sFocus,    setSFocus]    = useState(false);
 
   return (
-    <div style={{ display: "flex", height: hideSidebar ? "100%" : "100vh", background: T.bg, fontFamily: "Inter, system-ui, sans-serif", color: T.navy, overflow: "hidden", width: "100%" }}>
+    <div style={{ display: "flex", minHeight: "100%", background: T.bg, fontFamily: "Inter, system-ui, sans-serif", color: T.navy, width: "100%" }}>
 
       {/* ══════════════════════ SIDEBAR ══════════════════════ */}
       {!hideSidebar && (
@@ -395,7 +395,7 @@ export default function AdminDashboard({
       )}
 
       {/* ══════════════════════ MAIN AREA ══════════════════════ */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
 
         {/* ── Top header ── */}
         <header style={{ height: 58, background: T.white, borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", padding: "0 24px", gap: 16, flexShrink: 0, position: "sticky", top: 0, zIndex: 10 }}>
@@ -443,7 +443,7 @@ export default function AdminDashboard({
         </header>
 
         {/* ── Scrollable body ── */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "22px 24px 48px" }}>
+        <div style={{ flex: 1, padding: "22px 24px 48px" }}>
 
           {/* ══ 1. STAT TILES ══ */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 22 }}>

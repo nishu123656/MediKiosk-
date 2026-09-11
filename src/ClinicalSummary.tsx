@@ -167,6 +167,7 @@ function TopBar({ onBack }: { onBack: () => void }) {
       background: T.white, borderBottom: `1px solid ${T.border}`,
       height: 60, display: "flex", alignItems: "center",
       padding: "0 28px", flexShrink: 0, gap: 16,
+      position: "sticky", top: 0, zIndex: 20,
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
         <div style={{ width: 30, height: 30, background: T.primary, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center" }}>

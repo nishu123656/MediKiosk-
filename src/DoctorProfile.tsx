@@ -201,7 +201,7 @@ function Avatar({ initials, size = 80 }: { initials: string; size?: number }) {
 }
 
 // ── Root ───────────────────────────────────────────────────────────────────────
-export default function DoctorProfile({ onBack }: { onBack: () => void }) {
+export default function DoctorProfile({ onBack, hideSidebar = true }: { onBack: () => void; hideSidebar?: boolean }) {
   const [activeNav,     setActiveNav]     = useState("avail");
   const [saved,         setSaved]         = useState(false);
   const [editMode,      setEditMode]      = useState(false);
@@ -238,9 +238,10 @@ export default function DoctorProfile({ onBack }: { onBack: () => void }) {
   }
 
   return (
-    <div style={{ display: "flex", height: "100vh", background: T.bg, fontFamily: "Inter, system-ui, sans-serif", color: T.navy, overflow: "hidden" }}>
+    <div style={{ display: "flex", minHeight: "100%", width: "100%", background: T.bg, fontFamily: "Inter, system-ui, sans-serif", color: T.navy }}>
 
       {/* ═══ SIDEBAR ═══ */}
+      {!hideSidebar && (
       <aside style={{ width: 210, minWidth: 210, background: T.navy, display: "flex", flexDirection: "column", height: "100vh", flexShrink: 0 }}>
         <div style={{ padding: "16px 14px 14px", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
@@ -294,9 +295,10 @@ export default function DoctorProfile({ onBack }: { onBack: () => void }) {
           </div>
         </div>
       </aside>
+      )}
 
       {/* ═══ MAIN ═══ */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, overflow: "hidden" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
 
         {/* Header */}
         <header style={{ height: 56, background: T.white, borderBottom: `1px solid ${T.border}`, display: "flex", alignItems: "center", padding: "0 24px", gap: 14, flexShrink: 0, position: "sticky" as const, top: 0, zIndex: 10 }}>
@@ -345,7 +347,7 @@ export default function DoctorProfile({ onBack }: { onBack: () => void }) {
         </header>
 
         {/* Body */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "20px 24px 56px" }}>
+        <div style={{ flex: 1, padding: "20px 24px 56px" }}>
           <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 296px", gap: 18 }}>
 
             {/* ── LEFT ── */}
